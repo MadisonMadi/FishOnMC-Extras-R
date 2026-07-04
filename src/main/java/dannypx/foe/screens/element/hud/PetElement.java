@@ -15,8 +15,11 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+
+import java.awt.*;
 
 public class PetElement extends Element {
     //region Fields
@@ -114,18 +117,35 @@ public class PetElement extends Element {
             int component2x = 40;
             int component2y = 21;
 
-            Component level = Component.literal(
-                    String.valueOf(InventoryHandler.instance().getCurrentPet().getLevel())
-            ).withStyle(ChatFormatting.GREEN);
+            int levelValue = InventoryHandler.instance().getCurrentPet().getLevel();
+            MutableComponent level;
+            if (levelValue >= 100) {
+                level = Component.literal(String.valueOf(levelValue)).withColor(TextHelper.getRainbowColor());
+            } else {
+                float hue = (float)(levelValue - 1) / 99.0F;
+                level = Component.literal(String.valueOf(levelValue)).withColor(Color.HSBtoRGB(hue, 1.0F, 1.0F));
+            }
+
             int bars = 20;
-            int progress = (int) (bars * InventoryHandler.instance().getCurrentPet().getProgress());
+            float rawProgress = InventoryHandler.instance().getCurrentPet().getProgress();
+            rawProgress = Math.max(0, Math.min(1, rawProgress));
+            int progress = Math.round(rawProgress * bars);
+            progress = Math.clamp(progress, 0, bars);
             int progressLeft = bars - progress;
-            Component progressComponent = Component.literal(" ".repeat(Math.max(0, progress)))
-                    .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.GOLD);
+
+            MutableComponent progressComponent = Component.empty();
+            for (int i = 0; i < progress; i++) {
+                MutableComponent segment = Component.literal(" ").withStyle(ChatFormatting.STRIKETHROUGH);
+                if (level.getStyle().getColor() != null) {
+                    segment = segment.withStyle(style -> style.withColor(level.getStyle().getColor()));
+                }
+                progressComponent.append(segment);
+            }
+
             Component progressLeftComponent = Component.literal(" ".repeat(Math.min(bars, progressLeft)))
                     .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.DARK_GRAY);
 
-            Component levelComponent = TextHelper.concat(
+            MutableComponent levelComponent = TextHelper.concat(
                     Component.literal("LV. ").withStyle(ChatFormatting.GRAY),
                     level,
                     Component.literal(" [").withStyle(ChatFormatting.DARK_GRAY),

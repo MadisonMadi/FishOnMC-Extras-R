@@ -562,4 +562,10 @@ public class TextHelper {
                 .mapOrElse((com.mojang.datafixers.util.Pair::getFirst), (pairError -> Component.empty()));
 
     }
+
+    public static int getRainbowColor() {
+        long time = System.currentTimeMillis();
+        float hue = (time % 5000) / 5000.0f;
+        return java.awt.Color.HSBtoRGB(hue, 0.8f, 1.0f) & 0xFFFFFF;
+    }
 }

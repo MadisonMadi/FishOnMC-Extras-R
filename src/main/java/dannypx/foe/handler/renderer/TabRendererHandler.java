@@ -56,8 +56,7 @@ public class TabRendererHandler extends Handler {
                 int gradientWidth = 150;
 
                 // Box
-                GuiGraphicsHelper.drawHorizontalGradient(guiGraphicsExtractor, x1, y1, x1 + gradientWidth, y1 + CrewHandler.instance().getOnlineMembers().size() * 9 - 1, 0x88FFAA00, 0x00FFAA00);
-
+                GuiGraphicsHelper.drawHorizontalGradient(guiGraphicsExtractor, x1, y1, x1 + gradientWidth, y1 + CrewHandler.instance().getOnlineMembers().size() * 9 - 1, -2013265920 | TextHelper.getRainbowColor() & 1048575, 16777215);
                 // Border
                 guiGraphicsExtractor.verticalLine(x1 - 1, y1 - 1, y1 + CrewHandler.instance().getOnlineMembers().size() * 9 - 1, 0xFF000000);
                 GuiGraphicsHelper.drawHorizontalGradient(guiGraphicsExtractor, x1 - 1, y1 - 1, x1 + gradientWidth, y1, 0xFF000000, 0x00000000);
