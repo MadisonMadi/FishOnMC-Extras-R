@@ -3,7 +3,7 @@ plugins {
 	id 'maven-publish'
 }
 
-version = "${project.mod_version}+${project.minecraft_version}"
+version = "${project.mod_version}+${project.minecraft_version}-${"Moggie"}"
 group = project.maven_group
 
 base {
@@ -33,7 +33,7 @@ dependencies {
 
 	// Mod Dependencies.
 	modImplementation("me.fzzyhmstrs:fzzy_config:${project.fzzy_version}")
-	
+
 }
 
 processResources {

@@ -116,12 +116,12 @@ public class PetElement extends Element {
 
             Component level = Component.literal(
                     String.valueOf(InventoryHandler.instance().getCurrentPet().getLevel())
-            ).withStyle(ChatFormatting.GREEN);
+            ).withColor(TextHelper.getRainbowColor());
             int bars = 20;
             int progress = (int) (bars * InventoryHandler.instance().getCurrentPet().getProgress());
             int progressLeft = bars - progress;
             Component progressComponent = Component.literal(" ".repeat(Math.max(0, progress)))
-                    .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.GOLD);
+                    .withStyle(ChatFormatting.STRIKETHROUGH).withColor(TextHelper.getRainbowColor());
             Component progressLeftComponent = Component.literal(" ".repeat(Math.min(bars, progressLeft)))
                     .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.DARK_GRAY);
 

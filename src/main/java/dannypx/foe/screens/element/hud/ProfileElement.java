@@ -139,14 +139,30 @@ public class ProfileElement extends Element {
         int component2x = 40;
         int component2y = 21;
 
-        Component level = ScoreboardHandler.instance().getLevel().getString().isBlank()
-                ? Component.literal("0").withStyle(ChatFormatting.DARK_GRAY)
-                : ScoreboardHandler.instance().getLevel();
+        Component levelRaw = ScoreboardHandler.instance().getLevel();
+        int levelValue = 0;
+        String levelString = levelRaw.getString().trim();
+        if (!levelString.isEmpty()) {
+            try {
+                levelValue = Integer.parseInt(levelString);
+            } catch (NumberFormatException ignored) {}
+        }
+
+        Component level;
+        if (levelValue >= 300) {
+            level = Component.literal(String.valueOf(levelValue))
+                    .withColor(TextHelper.getRainbowColor());
+        } else {
+            level = levelRaw;
+            if (level.getString().isBlank()) {
+                level = Component.literal("0").withStyle(ChatFormatting.DARK_GRAY);
+            }
+        }
         int bars = 20;
         int progress = (int) (bars * LocalPlayerHandler.instance().getExperienceProgress());
         int progressLeft = bars - progress;
         Component progressComponent = Component.literal(" ".repeat(progress))
-                .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.GOLD);
+                .withStyle(ChatFormatting.STRIKETHROUGH).withColor(TextHelper.getRainbowColor());
         Component progressLeftComponent = Component.literal(" ".repeat(progressLeft))
                 .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.DARK_GRAY);
 
