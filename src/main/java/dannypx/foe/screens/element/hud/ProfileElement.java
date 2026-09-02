@@ -16,7 +16,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
 
@@ -146,12 +145,9 @@ public class ProfileElement extends Element {
         int bars = 20;
         int progress = (int) (bars * LocalPlayerHandler.instance().getExperienceProgress());
         int progressLeft = bars - progress;
-        MutableComponent progressComponent = Component.literal(" ".repeat(progress))
-                .withStyle(ChatFormatting.STRIKETHROUGH);
-        if (level.getStyle().getColor() != null) {
-            progressComponent = progressComponent.withStyle(style ->
-                    style.withColor(level.getStyle().getColor()));
-        }
+        Component progressComponent = Component.literal(" ".repeat(progress))
+                .withStyle(ChatFormatting.STRIKETHROUGH)
+                .withStyle(style -> style.withColor(level.getStyle().getColor()));
         Component progressLeftComponent = Component.literal(" ".repeat(progressLeft))
                 .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.DARK_GRAY);
 

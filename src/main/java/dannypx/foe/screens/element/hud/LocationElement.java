@@ -179,7 +179,7 @@ public class LocationElement extends Element {
                         true);
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
-                        time,
+                        crewtimeTotal,
                         x - component3x - crewtimeWidth, y + component3y,
                         true,
                         true,
