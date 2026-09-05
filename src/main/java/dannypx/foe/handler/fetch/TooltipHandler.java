@@ -37,16 +37,10 @@ public class TooltipHandler extends Handler {
 
     //region Methods
     public void fetchTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, TooltipFlag tooltipFlag, List<Component> components) {
-        Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack);
+        Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack, true);
         if(validatedItem.value1()) {
             Pair<Boolean, ArmorTagObject> validatedArmor = ValidateItem.isArmor(validatedItem.value2());
             if(validatedArmor.value1()) this.setArmorRolls(validatedArmor.value2(), components);
-
-            if(ValidateItem.isAuctionItem(validatedItem.value2())) {
-                this.setPricesPerItem(validatedItem.value2(), components);
-            } else if(this.isTackleShopItem(components)) {
-                this.setPricesPerItemRaw(validatedItem.value2(), components);
-            }
         } else {
             if(itemStack.getItem() == Items.ENDER_EYE
                     && itemStack.get(DataComponents.LORE) != null
@@ -184,74 +178,6 @@ public class TooltipHandler extends Handler {
                 components.add(qualityLine + 1, seperatorComponent);
             }
         }
-    }
-
-    private boolean isTackleShopItem(List<Component> components) {
-        if(components.size() < TagObject.SHOP_PRICE_LINE + 2) {
-            return false;
-        }
-
-        int priceLine = Minecraft.getInstance().options.advancedItemTooltips ? TagObject.SHOP_PRICE_LINE + 2 : TagObject.SHOP_PRICE_LINE;
-
-        Component priceComponent = components.get(components.size() - priceLine);
-        return priceComponent.getString().contains("Price: $");
-    }
-
-    private void setPricesPerItem(TagObject tagObject, List<Component> components) {
-        if(components.size() < TagObject.SHOP_PRICE_LINE + 2) {
-            return;
-        }
-
-        if(tagObject.getCount() > 1) {
-            float price = tagObject.getMoney();
-
-            this.setPrice(tagObject, components, price);
-        }
-    }
-
-
-    private void setPricesPerItemRaw(TagObject tagObject, List<Component> componentList) {
-        if(componentList.size() < TagObject.SHOP_PRICE_LINE + 2) {
-            return;
-        }
-        int priceLine = Minecraft.getInstance().options.advancedItemTooltips ? TagObject.SHOP_PRICE_LINE + 2 : TagObject.SHOP_PRICE_LINE;
-
-        Component priceComponent = componentList.get(componentList.size() - priceLine).copy();
-        float price = TextHelper.toIntFromString(priceComponent.getString().substring(priceComponent.getString().indexOf("$") + 1));
-
-        this.setPrice(tagObject, componentList, price);
-    }
-
-    private void setPrice(TagObject tagObject, List<Component> componentList, float price) {
-        int priceLine = Minecraft.getInstance().options.advancedItemTooltips ? TagObject.SHOP_PRICE_LINE + 2 : TagObject.SHOP_PRICE_LINE;
-
-        if(price != 0f) {
-            float pricePerItem = price / tagObject.getCount();
-            String pricePerItemString = TextHelper.shortenNumber(pricePerItem, 2);
-
-            Component pricePerItemComponent = TextHelper.concat(
-                    Component.literal(" (").withStyle(ChatFormatting.DARK_GRAY),
-                    Component.literal("$").withStyle(ChatFormatting.DARK_GREEN),
-                    Component.literal(pricePerItemString).withStyle(ChatFormatting.DARK_GREEN),
-                    Component.literal(TextHelper.smallCaps(" per item")).withStyle(ChatFormatting.GRAY),
-                    Component.literal(")").withStyle(ChatFormatting.DARK_GRAY)
-            );
-
-
-            componentList.set(componentList.size() - priceLine, TextHelper.concat(
-                    componentList.get(componentList.size() - priceLine),
-                    pricePerItemComponent
-            ));
-        }
-    }
-
-    private Component getPercentComponent(String percent) {
-        return TextHelper.concat(
-                Component.literal(" ("),
-                Component.literal(percent),
-                Component.literal("%)")
-
-        );
     }
     //endregion
 

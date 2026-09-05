@@ -387,12 +387,12 @@ public class SearchHandler extends Handler {
         return switch (searchFilter.value) {
             case StringValue stringValue -> {
                 if(searchFilter.operator == Operator.SHORT_EQUAL) {
-                    Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack);
+                    Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack, true);
                     if(validatedItem.value1() && validatedItem.value2().contains(searchFilter.key)) {
                         yield validatedItem.value2().getString(searchFilter.key).toLowerCase(Locale.US).contains(stringValue.value().toLowerCase(Locale.US));
                     }
                 } else if(searchFilter.operator == Operator.EQUAL) {
-                    Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack);
+                    Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack, true);
                     if(validatedItem.value1() && validatedItem.value2().contains(searchFilter.key)) {
                         yield validatedItem.value2().getString(searchFilter.key).toLowerCase(Locale.US).equalsIgnoreCase(stringValue.value().toLowerCase(Locale.US));
                     }
@@ -401,7 +401,7 @@ public class SearchHandler extends Handler {
             }
             case BooleanValue booleanValue -> {
                 if(searchFilter.operator == Operator.EQUAL || searchFilter.operator == Operator.SHORT_EQUAL) {
-                    Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack);
+                    Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack, true);
                     if(validatedItem.value1() && validatedItem.value2().contains(searchFilter.key)) {
                         yield validatedItem.value2().getBoolean(searchFilter.key) == booleanValue.value();
                     }
@@ -409,7 +409,7 @@ public class SearchHandler extends Handler {
                 yield false;
             }
             case FloatValue floatValue -> {
-                Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack);
+                Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(itemStack, true);
                 if(validatedItem.value1() && validatedItem.value2().contains(searchFilter.key)) {
                     yield switch (validatedItem.value2().getType(searchFilter.key)) {
                         case 3 -> MathHelper.checkOperation( searchFilter, floatValue, (float) validatedItem.value2().getInt(searchFilter.key));

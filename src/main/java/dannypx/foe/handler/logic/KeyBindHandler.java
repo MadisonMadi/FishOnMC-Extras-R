@@ -29,23 +29,6 @@ public class KeyBindHandler extends Handler {
     public boolean isPressingInspect() {
         return isPressingInspect;
     }
-
-    public Pair<Boolean, PlaceholderValue> getKeyBind(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(open_main_keybind|inspect_keybind)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "open_main_keybind" -> PlaceholderHandler.getPlaceholderValue(StringValue.of(KeyBindHelper.getKeyString(Configs.keyBindConfig.openMainKeybind)));
-                    case "inspect_keybind" -> PlaceholderHandler.getPlaceholderValue(StringValue.of(KeyBindHelper.getKeyString(Configs.keyBindConfig.inspectKeybind)));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
     //endregion
 
     //region Methods

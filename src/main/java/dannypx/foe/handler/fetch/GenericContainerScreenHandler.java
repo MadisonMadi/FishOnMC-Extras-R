@@ -2,6 +2,7 @@ package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.CodeExecuterHandler;
+import dannypx.foe.handler.logic.EventHandler;
 import dannypx.foe.handler.renderer.*;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.config.Configs;

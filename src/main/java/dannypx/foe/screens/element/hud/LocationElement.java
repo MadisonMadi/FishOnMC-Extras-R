@@ -3,17 +3,17 @@ package dannypx.foe.screens.element.hud;
 import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.handler.fetch.BossEventHandler;
 import dannypx.foe.handler.fetch.TabOverlayHandler;
-import dannypx.foe.handler.logic.CrewHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.config.Configs;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.screens.element.Element;
+import dannypx.foe.type.StringStyle;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -49,12 +49,12 @@ public class LocationElement extends Element {
 
     //region Methods
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         int scaledWidth = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * (1 / Configs.hudConfig.locationElementScale.get()));
         int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * (1 / Configs.hudConfig.locationElementScale.get()));
 
-        guiGraphicsExtractor.pose().pushMatrix();
-        guiGraphicsExtractor.pose().scale(Configs.hudConfig.locationElementScale.get(), Configs.hudConfig.locationElementScale.get());
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().scale(Configs.hudConfig.locationElementScale.get(), Configs.hudConfig.locationElementScale.get());
         if(LoadingHandler.instance().isLoadingDone()
                 && Configs.hudConfig.showLocationElement.get()
                 && TabOverlayHandler.instance().isInInstance()
@@ -73,13 +73,13 @@ public class LocationElement extends Element {
             };
             int y = Math.round(scaledHeight * yPos);
 
-            this.extractRenderTexture(guiGraphicsExtractor, x, y);
-            this.extractRenderText(guiGraphicsExtractor, Minecraft.getInstance().font, x, y);
+            this.renderTexture(guiGraphics, x, y);
+            this.renderComponent(guiGraphics, Minecraft.getInstance().font, x, y);
         }
-        guiGraphicsExtractor.pose().popMatrix();
+        guiGraphics.pose().popMatrix();
     }
 
-    private void extractRenderText(GuiGraphicsExtractor guiGraphicsExtractor, Font font, int x, int y) {
+    private void renderComponent(GuiGraphics guiGraphics, Font font, int x, int y) {
         int component1x = 24;
         int component1y = 7;
 
@@ -116,87 +116,52 @@ public class LocationElement extends Element {
         int component3y = 26;
 
         Component time = BossEventHandler.instance().getTime();
-        Component nearbyCrew = TextHelper.literal(CrewHandler.instance().isCrewNearby(), true);
-
-        Component crewtimeTotal = switch (Configs.hudConfig.locationElementAlignment.get()) {
-            case TOP_LEFT -> TextHelper.concat(
-                    time,
-                    Component.literal(" | ").withStyle(ChatFormatting.DARK_GRAY),
-                    Component.literal("Crew Nearby: ").withStyle(ChatFormatting.WHITE),
-                    nearbyCrew
-            );
-            case TOP_RIGHT -> TextHelper.concat(
-                    Component.literal("Crew Nearby: ").withStyle(ChatFormatting.WHITE),
-                    nearbyCrew,
-                    Component.literal(" | ").withStyle(ChatFormatting.DARK_GRAY),
-                    time
-            );
-            default -> Component.empty();
-        };
-        int crewtimeWidth = font.width(TextHelper.smallCaps(crewtimeTotal.getString()));
+        int timeWidth = font.width(TextHelper.smallCaps(time.getString()));
 
         switch (Configs.hudConfig.locationElementAlignment.get()) {
             case TOP_LEFT -> {
-                GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                GuiGraphicsHelper.drawString(guiGraphics, font,
                         weather,
                         x + component1x - (weatherWidth / 2), y + component1y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
-                GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                GuiGraphicsHelper.drawString(guiGraphics, font,
                         locationTotal,
                         x + component2x, y + component2y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
-                GuiGraphicsHelper.text(guiGraphicsExtractor, font,
-                        crewtimeTotal,
+                GuiGraphicsHelper.drawString(guiGraphics, font,
+                        time,
                         x + component3x, y + component3y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
             }
             case TOP_RIGHT -> {
-                GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                GuiGraphicsHelper.drawString(guiGraphics, font,
                         weather,
                         x - component1x - (weatherWidth / 2), y + component1y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
-                GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                GuiGraphicsHelper.drawString(guiGraphics, font,
                         locationTotal,
                         x - component2x - locationWidth, y + component2y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
-                GuiGraphicsHelper.text(guiGraphicsExtractor, font,
-                        crewtimeTotal,
-                        x - component3x - crewtimeWidth, y + component3y,
-                        true,
-                        true,
-                        false,
-                        true);
+                GuiGraphicsHelper.drawString(guiGraphics, font,
+                        time,
+                        x - component3x - timeWidth, y + component3y,
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
             }
         }
     }
 
-    private void extractRenderTexture(GuiGraphicsExtractor guiGraphicsExtractor, int x, int y) {
+    private void renderTexture(GuiGraphics guiGraphics, int x, int y) {
         switch (Configs.hudConfig.locationElementAlignment.get()) {
-            case TOP_LEFT -> guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED,
+            case TOP_LEFT -> guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                     LOCATION_TEXTURE,
                     x, y,
                     width, height
             );
-            case TOP_RIGHT -> guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED,
+            case TOP_RIGHT -> guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                     LOCATION_TEXTURE_FLIP,
                     x - width, y,
                     width, height

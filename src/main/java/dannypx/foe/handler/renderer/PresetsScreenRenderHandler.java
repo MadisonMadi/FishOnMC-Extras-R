@@ -1,5 +1,6 @@
 package dannypx.foe.handler.renderer;
 
+import dannypx.foe.config.Configs;
 import dannypx.foe.handler.ScreenHandler;
 import dannypx.foe.handler.logic.SearchHandler;
 import dannypx.foe.type.tuple.Pair;
@@ -26,7 +27,7 @@ public class PresetsScreenRenderHandler extends ScreenHandler {
 
     //region Methods
     public boolean checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount, boolean consumed) {
-        if(screen instanceof ContainerScreen containerScreen) {
+        if(screen instanceof ContainerScreen containerScreen && Configs.keyBindConfig.scrollWheelScrolling.get()) {
             int syncId = containerScreen.getMenu().containerId;
             int moveSlot = -1;
 

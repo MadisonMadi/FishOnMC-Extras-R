@@ -8,5 +8,9 @@ public enum EventTrigger {
     ON_NEAR_FULL_INVENTORY,
     ON_FULL_INVENTORY,
     ON_QUEST_COMPLETE,
+    ON_SCREEN_OPEN,
+    ON_SCREEN_CLOSE,
+    ON_PET_EQUIP,
+    ON_PET_UNEQUIP,
     DEFAULT
 }

@@ -11,6 +11,7 @@ public record StringValue(String value) implements PlaceholderValue {
     }
 
     public static StringValue valueOf(int value) { return new StringValue(String.valueOf(value)); }
+    public static StringValue valueOf(short value) { return new StringValue(String.valueOf(value)); }
     public static StringValue valueOf(char value) { return new StringValue(String.valueOf(value)); }
     public static StringValue valueOf(float value) { return new StringValue(String.valueOf(value)); }
     public static StringValue valueOf(long value) { return new StringValue(String.valueOf(value)); }

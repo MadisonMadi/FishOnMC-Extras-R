@@ -32,23 +32,6 @@ public class ConnectionHandler extends Handler {
     public boolean wasOnServer() {
         return wasOnServer;
     }
-
-    public Pair<Boolean, PlaceholderValue> getConnection(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(is_on_server|was_on_server)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "is_on_server" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(isOnServer()));
-                    case "was_on_server" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(wasOnServer()));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
     //endregion
 
     //region Methods

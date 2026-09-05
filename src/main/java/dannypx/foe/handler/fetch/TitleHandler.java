@@ -2,12 +2,10 @@ package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.CatchingHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.ComponentValue;
+
 import java.util.Map;
-import java.util.regex.Pattern;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -31,23 +29,6 @@ public class TitleHandler extends Handler {
 
     public MutableComponent getSubTitle() {
         return subTitle;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getTitle(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(title|sub_title)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "title" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getTitle()));
-                    case "sub_title" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getSubTitle()));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 

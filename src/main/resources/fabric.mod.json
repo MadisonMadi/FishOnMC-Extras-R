@@ -40,6 +40,7 @@
 			"fishonmcextras"
 		],
 		"hud_version": 3,
+		"hud_icon_version": 1,
 		"button_version": 1,
 		"notification_version": 2,
 		"chat_notification_version": 1,

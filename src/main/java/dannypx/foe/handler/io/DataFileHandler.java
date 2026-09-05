@@ -6,6 +6,7 @@ import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.logic.LoggerHandler;
+import dannypx.foe.handler.logic.UpdateHandler;
 import dannypx.foe.handler.store.*;
 import dannypx.foe.type.custom_value.TrackerValue;
 import dannypx.foe.type.tuple.Pair;
@@ -48,6 +49,7 @@ public class DataFileHandler extends Handler {
         QuestDataHandler.instance().tick();
         CrewDataHandler.instance().tick();
         CustomHudDataHandler.instance().tick();
+        CustomHudIconDataHandler.instance().tick();
         CustomButtonDataHandler.instance().tick();
         CustomNotificationDataHandler.instance().tick();
         CustomChatNotificationDataHandler.instance().tick();
@@ -61,6 +63,7 @@ public class DataFileHandler extends Handler {
         for (DataModels.DataModelType value : DataModels.DataModelType.values()) {
             this.loadDataToMemory(value);
         }
+        UpdateHandler.checkUpdate();
     }
 
     private boolean loadDataToMemory(DataModels.DataModelType dataModelType) {
@@ -136,6 +139,7 @@ public class DataFileHandler extends Handler {
             case QUEST_DATA -> QuestDataHandler.instance().getQuestData();
             case CREW_DATA -> CrewDataHandler.instance().getCrewData();
             case CUSTOM_HUD_DATA -> CustomHudDataHandler.instance().getCustomHudData();
+            case CUSTOM_HUD_ICON_DATA -> CustomHudIconDataHandler.instance().getCustomHudIconData();
             case CUSTOM_BUTTON_DATA -> CustomButtonDataHandler.instance().getCustomButtonData();
             case CUSTOM_NOTIFICATION_DATA -> CustomNotificationDataHandler.instance().getCustomNotificationData();
             case CUSTOM_CHAT_TRIGGER_DATA -> CustomChatTriggerDataHandler.instance().getCustomChatTriggerData();
@@ -170,6 +174,8 @@ public class DataFileHandler extends Handler {
                     CrewDataHandler.instance().setCrewData(gson.fromJson(json, CrewDataHandler.CrewDataModel.class));
             case CUSTOM_HUD_DATA ->
                     CustomHudDataHandler.instance().setCustomHudData(gson.fromJson(json, CustomHudDataHandler.CustomHudDataModel.class));
+            case CUSTOM_HUD_ICON_DATA ->
+                    CustomHudIconDataHandler.instance().setCustomHudIconData(gson.fromJson(json, CustomHudIconDataHandler.CustomHudIconDataModel.class));
             case CUSTOM_BUTTON_DATA ->
                     CustomButtonDataHandler.instance().setCustomButtonData(gson.fromJson(json, CustomButtonDataHandler.CustomButtonDataModel.class));
             case CUSTOM_NOTIFICATION_DATA ->

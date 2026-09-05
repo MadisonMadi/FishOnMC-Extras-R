@@ -1,12 +1,15 @@
 package dannypx.foe.handler.renderer;
 
 import dannypx.foe.handler.ScreenHandler;
+import dannypx.foe.handler.logic.CodeExecuterHandler;
+import dannypx.foe.handler.logic.EventHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.store.ConstantDataHandler;
 import dannypx.foe.handler.store.CustomButtonDataHandler;
 import dannypx.foe.handler.store.StatsDataHandler;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.helper.TextHelper;
+import dannypx.foe.type.StringStyle;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.config.Configs;
 import dannypx.foe.screens.CustomButtonMakerScreen;
@@ -108,7 +111,7 @@ public class InventoryScreenRenderHandler extends ScreenHandler {
                         + (STAT_WIDTH - ((STAT_WIDTH / 4) / 3)) / 2 - headerWidth / 2,
                 minecraft.getWindow().getGuiScaledHeight() / 2
                         - INVENTORY_TOP - 10 + 4 - font.lineHeight / 2,
-                true, true, true, true
+                StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS
         );
     }
 

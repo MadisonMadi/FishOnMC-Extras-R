@@ -55,44 +55,6 @@ public class CrewHandler extends Handler {
     public boolean isCrewNearby() {
         return isCrewNearby;
     }
-
-    public Pair<Boolean, PlaceholderValue> getCrew(String[] params) {
-        if(params.length > 0) {
-            Pattern crewListPattern = Pattern.compile("^(online|offline|is_crew_nearby)$");
-            Pattern intPattern = Pattern.compile("^-?\\d+$");
-            Pattern crewPattern = Pattern.compile("^(id|name)$");
-
-            if(crewListPattern.matcher(params[0]).matches()) {
-                List<Pair<UUID, String>> list;
-
-                switch (params[0]) {
-                    case "online" -> list = getOnlineMembers();
-                    case "offline" -> list = getOfflineMembers();
-                    case "is_crew_nearby" -> {
-                        return PlaceholderHandler.getPlaceholderValue(ComponentValue.of(TextHelper.literal(isCrewNearby(), true)));
-                    }
-                    default -> list = new ArrayList<>();
-                }
-
-                if(params.length == 3
-                        && intPattern.matcher(params[1]).matches()
-                        && crewPattern.matcher(params[2]).matches()
-                ) {
-                    int index = Integer.parseInt(params[1]);
-                    if(list.size() > index) {
-                        Pair<UUID, String> crew = list.get(index);
-                        return switch (params[2]) {
-                            case "id" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(crew.value1()));
-                            case "name" -> PlaceholderHandler.getPlaceholderValue(StringValue.of(crew.value2()));
-                            default -> PlaceholderHandler.noResult();
-                        };
-                    }
-                }
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
-
     //endregion
 
     //region Method

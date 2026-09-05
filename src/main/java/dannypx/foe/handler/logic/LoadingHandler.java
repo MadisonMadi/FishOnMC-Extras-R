@@ -39,23 +39,6 @@ public class LoadingHandler extends Handler {
     public void setError(boolean error) {
         isError = error;
     }
-
-    public Pair<Boolean, PlaceholderValue> getLoading(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(is_loading_done|is_error)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "is_loading_done" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(isLoadingDone()));
-                    case "is_error" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(isError()));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
     //endregion
 
     //region Methods

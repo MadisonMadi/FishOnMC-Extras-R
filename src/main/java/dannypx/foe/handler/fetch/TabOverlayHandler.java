@@ -3,17 +3,13 @@ package dannypx.foe.handler.fetch;
 import com.mojang.authlib.GameProfile;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.LoggerHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.StringValue;
-import dannypx.foe.type.placeholder.ComponentValue;
 import dannypx.foe.mixin.accessor.PlayerTabOverlayAccessor;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Pattern;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -45,24 +41,6 @@ public class TabOverlayHandler extends Handler {
 
     public boolean isInInstance() {
         return isInInstance;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getTab(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(player_name|instance|is_in_instance)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "player_name" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getPlayerName()));
-                    case "instance" -> PlaceholderHandler.getPlaceholderValue(StringValue.of(getInstance()));
-                    case "is_in_instance" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(isInInstance()));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 

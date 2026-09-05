@@ -69,7 +69,7 @@ public class PersonalVaultScreenRenderHandler extends ScreenHandler {
     }
 
     public boolean checkMouseScroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount, boolean consumed) {
-        if(screen instanceof ContainerScreen containerScreen) {
+        if(screen instanceof ContainerScreen containerScreen && Configs.keyBindConfig.scrollWheelScrolling.get()) {
             int syncId = containerScreen.getMenu().containerId;
             int moveSlot = -1;
 

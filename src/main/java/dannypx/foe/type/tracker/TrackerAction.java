@@ -12,6 +12,7 @@ public enum TrackerAction {
         return switch (trackerType) {
             case BOOLEAN -> List.of(SET, TOGGLE);
             case INTEGER -> List.of(SET, ADD, SUBTRACT);
+            case ITEMSTACK -> List.of(SET);
         };
     }
 }

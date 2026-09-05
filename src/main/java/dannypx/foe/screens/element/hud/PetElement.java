@@ -8,18 +8,16 @@ import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.config.Configs;
 import dannypx.foe.screens.element.Element;
+import dannypx.foe.type.StringStyle;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-
-import java.awt.*;
 
 public class PetElement extends Element {
     //region Fields
@@ -52,12 +50,12 @@ public class PetElement extends Element {
 
     //region Methods
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         int scaledWidth = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * (1 / Configs.hudConfig.petElementScale.get()));
         int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * (1 / Configs.hudConfig.petElementScale.get()));
 
-        guiGraphicsExtractor.pose().pushMatrix();
-        guiGraphicsExtractor.pose().scale(Configs.hudConfig.petElementScale.get(), Configs.hudConfig.petElementScale.get());
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().scale(Configs.hudConfig.petElementScale.get(), Configs.hudConfig.petElementScale.get());
         if(LoadingHandler.instance().isLoadingDone()
                 && Configs.hudConfig.showPetElement.get()
                 && TabOverlayHandler.instance().isInInstance()
@@ -76,34 +74,34 @@ public class PetElement extends Element {
             };
             int y = Math.round(scaledHeight * yPos);
 
-            this.extractRenderTexture(guiGraphicsExtractor, x, y);
-            this.extractRenderText(guiGraphicsExtractor, Minecraft.getInstance().font, x, y);
-            this.extractRenderPetIcon(guiGraphicsExtractor, x, y);
+            this.renderTexture(guiGraphics, x, y);
+            this.renderComponent(guiGraphics, Minecraft.getInstance().font, x, y);
+            this.renderPetIcon(guiGraphics, x, y);
         }
-        guiGraphicsExtractor.pose().popMatrix();
+        guiGraphics.pose().popMatrix();
     }
 
-    private void extractRenderPetIcon(GuiGraphicsExtractor guiGraphicsExtractor, int x, int y) {
+    private void renderPetIcon(GuiGraphics guiGraphics, int x, int y) {
         if(Minecraft.getInstance().player != null && InventoryHandler.instance().hasPet()) {
             ItemStack pet = InventoryHandler.instance().getCurrentPet().getItemStack();
 
-            guiGraphicsExtractor.pose().pushMatrix();
+            guiGraphics.pose().pushMatrix();
             switch (Configs.hudConfig.petElementAlignment.get()) {
                 case TOP_LEFT -> {
-                    guiGraphicsExtractor.pose().translate(x + 7, y + 7);
-                    guiGraphicsExtractor.pose().scale(1.5f, 1.5f);
+                    guiGraphics.pose().translate(x + 7, y + 7);
+                    guiGraphics.pose().scale(1.5f, 1.5f);
                 }
                 case TOP_RIGHT -> {
-                    guiGraphicsExtractor.pose().translate(x - 7 - 24, y + 7);
-                    guiGraphicsExtractor.pose().scale(1.5f, 1.5f);
+                    guiGraphics.pose().translate(x - 7 - 24, y + 7);
+                    guiGraphics.pose().scale(1.5f, 1.5f);
                 }
             }
-            guiGraphicsExtractor.item(pet, 0, 0);
-            guiGraphicsExtractor.pose().popMatrix();
+            guiGraphics.renderItem(pet, 0, 0);
+            guiGraphics.pose().popMatrix();
         }
     }
 
-    private void extractRenderText(GuiGraphicsExtractor guiGraphicsExtractor, Font font, int x, int y) {
+    private void renderComponent(GuiGraphics guiGraphics, Font font, int x, int y) {
         int component1x = 40;
         int component1y = 9;
 
@@ -117,35 +115,18 @@ public class PetElement extends Element {
             int component2x = 40;
             int component2y = 21;
 
-            int levelValue = InventoryHandler.instance().getCurrentPet().getLevel();
-            MutableComponent level;
-            if (levelValue >= 100) {
-                level = Component.literal(String.valueOf(levelValue)).withColor(TextHelper.getRainbowColor());
-            } else {
-                float hue = (float)(levelValue - 1) / 99.0F;
-                level = Component.literal(String.valueOf(levelValue)).withColor(Color.HSBtoRGB(hue, 1.0F, 1.0F));
-            }
-
+            Component level = Component.literal(
+                    String.valueOf(InventoryHandler.instance().getCurrentPet().getLevel())
+            ).withStyle(ChatFormatting.GREEN);
             int bars = 20;
-            float rawProgress = InventoryHandler.instance().getCurrentPet().getProgress();
-            rawProgress = Math.max(0, Math.min(1, rawProgress));
-            int progress = Math.round(rawProgress * bars);
-            progress = Math.clamp(progress, 0, bars);
+            int progress = (int) (bars * InventoryHandler.instance().getCurrentPet().getProgress());
             int progressLeft = bars - progress;
-
-            MutableComponent progressComponent = Component.empty();
-            for (int i = 0; i < progress; i++) {
-                MutableComponent segment = Component.literal(" ").withStyle(ChatFormatting.STRIKETHROUGH);
-                if (level.getStyle().getColor() != null) {
-                    segment = segment.withStyle(style -> style.withColor(level.getStyle().getColor()));
-                }
-                progressComponent.append(segment);
-            }
-
+            Component progressComponent = Component.literal(" ".repeat(Math.max(0, progress)))
+                    .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.GOLD);
             Component progressLeftComponent = Component.literal(" ".repeat(Math.min(bars, progressLeft)))
                     .withStyle(ChatFormatting.STRIKETHROUGH, ChatFormatting.DARK_GRAY);
 
-            MutableComponent levelComponent = TextHelper.concat(
+            Component levelComponent = TextHelper.concat(
                     Component.literal("LV. ").withStyle(ChatFormatting.GRAY),
                     level,
                     Component.literal(" [").withStyle(ChatFormatting.DARK_GRAY),
@@ -158,38 +139,26 @@ public class PetElement extends Element {
             switch (Configs.hudConfig.petElementAlignment.get()) {
                 case TOP_LEFT -> {
 
-                    GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                    GuiGraphicsHelper.drawString(guiGraphics, font,
                             pet,
                             x + component1x, y + component1y,
-                            true,
-                            true,
-                            true,
-                            true);
+                            StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS);
 
-                    GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                    GuiGraphicsHelper.drawString(guiGraphics, font,
                             levelComponent,
                             x + component2x, y + component2y,
-                            true,
-                            true,
-                            false,
-                            true);
+                            StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
                 }
                 case TOP_RIGHT -> {
-                    GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                    GuiGraphicsHelper.drawString(guiGraphics, font,
                             pet,
                             x - component1x - petWidth, y + component1y,
-                            true,
-                            true,
-                            true,
-                            true);
+                            StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS);
 
-                    GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                    GuiGraphicsHelper.drawString(guiGraphics, font,
                             levelComponent,
                             x - component2x - levelWidth, y + component2y,
-                            true,
-                            true,
-                            false,
-                            true);
+                            StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
                 }
             }
         } else {
@@ -197,32 +166,26 @@ public class PetElement extends Element {
             int petWidth = font.width(TextHelper.smallCaps(pet.getString()));
 
             switch (Configs.hudConfig.petElementAlignment.get()) {
-                case TOP_LEFT -> GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                case TOP_LEFT -> GuiGraphicsHelper.drawString(guiGraphics, font,
                         pet,
                         x + component1x, y + component1y,
-                        true,
-                        true,
-                        false,
-                        true);
-                case TOP_RIGHT -> GuiGraphicsHelper.text(guiGraphicsExtractor, font,
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
+                case TOP_RIGHT -> GuiGraphicsHelper.drawString(guiGraphics, font,
                         pet,
                         x - component1x - petWidth, y + component1y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
             }
         }
     }
 
-    private void extractRenderTexture(GuiGraphicsExtractor guiGraphicsExtractor, int x, int y) {
+    private void renderTexture(GuiGraphics guiGraphics, int x, int y) {
         switch (Configs.hudConfig.petElementAlignment.get()) {
-            case TOP_LEFT -> guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED,
+            case TOP_LEFT -> guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                     PET_TEXTURE,
                     x, y,
                     width, height
             );
-            case TOP_RIGHT -> guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED,
+            case TOP_RIGHT -> guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                     PET_TEXTURE_FLIP,
                     x - width, y,
                     width, height

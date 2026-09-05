@@ -1,19 +1,18 @@
 package dannypx.foe.handler.logic;
 
-import com.mojang.brigadier.StringReader;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.store.*;
+import dannypx.foe.helper.ItemStackHelper;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.item.FishTagObject;
 import dannypx.foe.item.TagObject;
 import dannypx.foe.item.PetTagObject;
+import dannypx.foe.placeholder.evaluator.PlaceholderResult;
+import dannypx.foe.placeholder.handler.PlaceholderHandlerV2;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.config.Configs;
 import java.util.*;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.arguments.item.ItemInput;
-import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -99,13 +98,13 @@ public class NotifierHandler extends Handler {
         Component sizeComponent = fish.getFishSizeComponent();
 
         Component lengthComponent = TextHelper.concat(
-                Component.literal(TextHelper.floatToString(fish.getLength(), 2)).withStyle(ChatFormatting.WHITE),
-                Component.literal("in ").withStyle(ChatFormatting.WHITE)
+                Component.literal(TextHelper.floatToString(fish.getLength(), 2)).withStyle(ChatFormatting.GRAY),
+                Component.literal("in ").withStyle(ChatFormatting.GRAY)
         );
 
         Component weightComponent = TextHelper.concat(
-                Component.literal(TextHelper.floatToString(fish.getWeight(), 2)).withStyle(ChatFormatting.WHITE),
-                Component.literal("lb ").withStyle(ChatFormatting.WHITE)
+                Component.literal(TextHelper.floatToString(fish.getWeight(), 2)).withStyle(ChatFormatting.GRAY),
+                Component.literal("lb ").withStyle(ChatFormatting.GRAY)
         );
 
         List<Component> notificationComponentList = new ArrayList<>(Arrays.asList(
@@ -283,6 +282,11 @@ public class NotifierHandler extends Handler {
         this.persistentNotifications.put(IMPORT_CREW_KEY, importCrewUUID);
     }
 
+    public void notifyUpdate(Notification notification, String key) {
+        UUID notificationUUID = this.addNotification(notification);
+        this.persistentNotifications.put(key, notificationUUID);
+    }
+
     public void notifyImportStatsCompleted() {
         this.addNotification(
                 new Notification(1, 1,
@@ -357,50 +361,42 @@ public class NotifierHandler extends Handler {
         );
     }
 
-    public void notifyOnTrigger(String notificationId) {
-        CustomNotificationDataHandler.CustomNotification notification = CustomNotificationDataHandler.instance().getCustomNotificationData().notificationList.getOrDefault(notificationId, null);
+    public void notifyOnTrigger(String[] notificationIds) {
+        for (String notificationId : notificationIds) {
+            CustomNotificationDataHandler.CustomNotification notification = CustomNotificationDataHandler.instance().getCustomNotificationData().notificationList.getOrDefault(notificationId.trim(), null);
 
-        if(notification != null && minecraft.player != null) {
-            ItemStack itemStack = ItemStack.EMPTY;
+            if(notification != null && minecraft.player != null) {
+                ItemStack itemStack = ItemStack.EMPTY;
 
-            if(!notification.getIcon().isBlank()) {
-                HolderLookup.Provider lookup = minecraft.player.registryAccess();
+                if(!notification.getIcon().isBlank()) {
+                    itemStack = ItemStackHelper.valueOf(notification.getIcon());
+                }
 
-                ItemParser itemParser = new ItemParser(lookup);
-                StringReader stringReader = new StringReader(notification.getIcon());
-                try {
-                    ItemInput result = itemParser.parse(stringReader);
+                List<MutableComponent> lines = notification.getStringLines().stream()
+                        .map(PlaceholderHandlerV2.instance()::resolve)
+                        .filter(result -> (result.success()[0] && !result.success()[1]) || !result.errors().isEmpty())
+                        .map(PlaceholderResult::text).toList();
+                List<Component> newLines = new ArrayList<>();
 
-                    itemStack = new ItemStack(result.item(), 1);
-                    itemStack.applyComponents(result.components());
-                } catch (Exception e) {
-                    LoggerHandler.error(e);
+                lines.forEach(line -> newLines.addAll(TextHelper.wrapStyledComponent(line, notification.getIcon().isBlank() ? CONTENT_WIDTH : ICON_CONTENT_WIDTH, true, minecraft.font)));
+
+                if(itemStack == ItemStack.EMPTY) {
+                    this.addNotification(
+                            new Notification(
+                                    newLines.size(), 1, 10,
+                                    newLines
+                            )
+                    );
+                } else {
+                    this.addNotification(
+                            new Notification(
+                                    itemStack,
+                                    newLines.size(), 1, 10,
+                                    newLines
+                            )
+                    );
                 }
             }
-
-            List<MutableComponent> lines = notification.getStringLines().stream().map(string -> string.replace("&", "§")).map(PlaceholderHandler::parsePlaceholderFromString).filter(Pair::value1).map(Pair::value2).toList();
-            List<Component> newLines = new ArrayList<>();
-
-            lines.forEach(line -> newLines.addAll(TextHelper.wrapStyledComponent(line, notification.getIcon().isBlank() ? CONTENT_WIDTH : ICON_CONTENT_WIDTH, true, minecraft.font)));
-
-            if(itemStack == ItemStack.EMPTY) {
-                this.addNotification(
-                        new Notification(
-                            newLines.size(), 1, 10,
-                            newLines
-                        )
-                );
-            } else {
-                this.addNotification(
-                        new Notification(
-                                itemStack,
-                                newLines.size(), 1, 10,
-                                newLines
-                        )
-                );
-            }
-
-
         }
     }
     //endregion

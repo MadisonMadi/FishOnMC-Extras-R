@@ -53,6 +53,11 @@ public class TagObject {
         this.itemStack = itemStack.copy();
     }
 
+    protected TagObject(@NotNull CompoundTag compoundTag) {
+        this.compoundTag = compoundTag;
+        this.itemStack = ItemStack.EMPTY;
+    }
+
     //region Generics
     public boolean contains(String key) {
         return this.compoundTag.contains(key);
@@ -60,6 +65,18 @@ public class TagObject {
 
     public int getInt(String key) {
         return this.compoundTag.getInt(key).orElse(0);
+    }
+
+    public short getShort(String key) {
+        return this.compoundTag.getShort(key).orElse((short) 0);
+    }
+
+    public long getLong(String key) {
+        return this.compoundTag.getLong(key).orElse(0L);
+    }
+
+    public double getDouble(String key) {
+        return this.compoundTag.getDouble(key).orElse(0d);
     }
 
     public float getFloat(String key) {
@@ -80,6 +97,34 @@ public class TagObject {
 
     public ListTag getList(String key) {
         return this.compoundTag.getList(key).orElse(new ListTag());
+    }
+
+    public int getIntFromArray(String key, int index) {
+        int[] array = this.compoundTag.getIntArray(key).orElse(new int[]{});
+        if(array.length > 0) {
+            return array[index];
+        }
+        return 0;
+    }
+
+    public long getLongFromArray(String key, int index) {
+        long[] array = this.compoundTag.getLongArray(key).orElse(new long[]{});
+        if(array.length > 0) {
+            return array[index];
+        }
+        return 0;
+    }
+
+    public byte getByteFromArray(String key, int index) {
+        byte[] array = this.compoundTag.getByteArray(key).orElse(new byte[]{});
+        if(array.length > 0) {
+            return array[index];
+        }
+        return 0;
+    }
+
+    public CompoundTag getTag(String key) {
+        return this.compoundTag.getCompound(key).orElse(null);
     }
 
     public Tag get(String key) {
@@ -239,6 +284,10 @@ public class TagObject {
 
     public static TagObject of(@NotNull CompoundTag compoundTag, @NotNull ItemStack itemStack) {
         return new TagObject(compoundTag, itemStack);
+    }
+
+    public static TagObject of(@NotNull CompoundTag compoundTag) {
+        return new TagObject(compoundTag);
     }
 
     public static TagObject empty() {

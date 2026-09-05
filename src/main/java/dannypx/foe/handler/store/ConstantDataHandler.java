@@ -3,14 +3,11 @@ package dannypx.foe.handler.store;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.ComponentValue;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -45,44 +42,6 @@ public class ConstantDataHandler extends Handler {
             DataFileHandler.instance().saveToFile(DataModels.DataModelType.CONSTANT_DATA);
         }
         this.needsUpdate = false;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getConstantData(String[] params) {
-        if(params.length > 0) {
-            Pattern categoryPattern = Pattern.compile("^(fish|pet)$");
-
-            if(Objects.equals(params[0], "data")
-                    && categoryPattern.matcher(params[1]).matches()
-                    && params.length == 4
-            ) {
-                return switch (params[1]) {
-                    case "fish" -> {
-                        Map<String, Component> subCat = getConstantData().fishData.getOrDefault(params[2], null);
-                        if(subCat != null) {
-                            Component field = subCat.getOrDefault(params[3], Component.empty());
-                            if(!Objects.equals(field, Component.empty())) yield PlaceholderHandler.getPlaceholderValue(ComponentValue.of(field));
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    case "pet" -> {
-                        Map<String, Component> subCat = getConstantData().petData.getOrDefault(params[2], null);
-                        if(subCat != null) {
-                            String param = params[3];
-
-                            if(Objects.equals(params[2], "rating")) {
-                                param = TextHelper.smallCaps(params[3]);
-                            }
-
-                            Component field = subCat.getOrDefault(param, Component.empty());
-                            if(!Objects.equals(field, Component.empty())) yield PlaceholderHandler.getPlaceholderValue(ComponentValue.of(field));
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 

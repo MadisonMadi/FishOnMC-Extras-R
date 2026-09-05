@@ -1,14 +1,12 @@
 package dannypx.foe.screens.widget;
 
-import com.mojang.brigadier.StringReader;
-import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.helper.GuiGraphicsHelper;
+import dannypx.foe.helper.ItemStackHelper;
 import dannypx.foe.helper.TextHelper;
+import dannypx.foe.type.StringStyle;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.screens.element.BoxElement;
 import dannypx.foe.screens.element.Element;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.commands.arguments.item.ItemInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,12 +15,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -69,58 +66,44 @@ public class SmallButtonWidget extends AbstractWidget {
     }
 
     @Override
-    protected void extractWidgetRenderState(@NotNull GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
-        this.extractRenderBox(guiGraphicsExtractor);
-        this.extractRenderIcon(guiGraphicsExtractor);
+    protected void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        this.renderBox(guiGraphics);
+        this.renderIcon(guiGraphics);
     }
 
-    private void extractRenderBox(GuiGraphicsExtractor guiGraphicsExtractor) {
-        (isHovered ? box_hover : box).value2().extractRenderState(guiGraphicsExtractor, minecraft.getDeltaTracker());
+    private void renderBox(GuiGraphics guiGraphics) {
+        (isHovered ? box_hover : box).value2().render(guiGraphics, minecraft.getDeltaTracker());
     }
 
-    private void extractRenderIcon(GuiGraphicsExtractor guiGraphicsExtractor) {
+    private void renderIcon(GuiGraphics guiGraphics) {
         Matcher m = PATTERN.matcher(icon);
 
         if (m.matches()) {
             if(m.group(1) != null) {
                 if(minecraft.player != null) {
-                    HolderLookup.Provider lookup = minecraft.player.registryAccess();
+                    ItemStack itemStack = ItemStackHelper.valueOf(icon);
 
-                    ItemParser itemParser = new ItemParser(lookup);
-                    StringReader stringReader = new StringReader(icon);
-                    try {
-                        ItemInput result = itemParser.parse(stringReader);
+                    guiGraphics.pose().pushMatrix();
+                    guiGraphics.pose().translate(getX() + ((float) width / 2) - 6, getY() + ((float) height / 2) - 6);
+                    guiGraphics.pose().scale(12f / 16f, 12f / 16f);
 
-                        ItemStack itemStack = new ItemStack(result.item(), 1);
-                        itemStack.applyComponents(result.components());
+                    guiGraphics.renderItem(itemStack, 0, 0);
 
-                        guiGraphicsExtractor.pose().pushMatrix();
-                        guiGraphicsExtractor.pose().translate(getX() + ((float) width / 2) - 6, getY() + ((float) height / 2) - 6);
-                        guiGraphicsExtractor.pose().scale(12f / 16f, 12f / 16f);
-
-                        guiGraphicsExtractor.item(itemStack, 0, 0);
-
-                        guiGraphicsExtractor.pose().popMatrix();
-                    } catch (Exception e) {
-                        LoggerHandler._debug(e.getMessage());
-                    }
+                    guiGraphics.pose().popMatrix();
                 }
             } else {
                 int stringWidth = minecraft.font.width(TextHelper.smallCaps(icon));
-                guiGraphicsExtractor.pose().pushMatrix();
-                guiGraphicsExtractor.pose().translate(0.0f, 0.0f);
+                guiGraphics.pose().pushMatrix();
+                guiGraphics.pose().translate(0.0f, 0.0f);
 
-                GuiGraphicsHelper.text(guiGraphicsExtractor,
+                GuiGraphicsHelper.drawString(guiGraphics,
                         minecraft.font,
                         Component.literal(icon),
                         getX() + (width / 2) - stringWidth / 2, getY() + (height / 2) - minecraft.font.lineHeight / 2,
-                        true,
-                        true,
-                        false,
-                        true
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS
                 );
 
-                guiGraphicsExtractor.pose().popMatrix();
+                guiGraphics.pose().popMatrix();
             }
         }
     }

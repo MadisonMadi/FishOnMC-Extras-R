@@ -4,19 +4,16 @@ import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
 import dannypx.foe.handler.logic.NotifierHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.item.FishTagObject;
 import dannypx.foe.item.TagObject;
 import dannypx.foe.item.PetTagObject;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.StringValue;
 import dannypx.foe.type.tuple.Triplet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.regex.Pattern;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -48,69 +45,6 @@ public class StatsDataHandler extends Handler {
             DataFileHandler.instance().saveToFile(DataModels.DataModelType.STATS_DATA);
         }
         this.needsUpdate = false;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getStatsData(String[] params) {
-        if(params.length > 0) {
-            Pattern categoryPattern = Pattern.compile("^(fish|pet|item)$");
-
-            if(Objects.equals(params[0], "data")
-                    && params.length >= 3
-                    && categoryPattern.matcher(params[1]).matches()
-            ) {
-                return switch (params[1]) {
-                    case "fish" -> {
-                        if(Objects.equals(params[2], "total")) yield PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getStatsData().fishTotal));
-                        if(params.length >= 5) {
-                            Map<String, Map<String, Stat<Integer, Integer>>> fishData = getStatsData().fishData;
-                            yield getStatsData(fishData, params[2], params[3], params[4], getStatsData().fishTotal);
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    case "pet" -> {
-                        if(Objects.equals(params[2], "total")) yield PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getStatsData().petTotal));
-                        if(Objects.equals(params[2], "dry_streak")) yield PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(
-                                getStatsData().fishTotal - getStatsData().petData.getOrDefault(PetTagObject.RARITY, new HashMap<>()).values().stream().mapToInt(stat -> stat.caughtOn).max().orElse(0))
-                        );
-                        if(params.length >= 5) {
-                            Map<String, Map<String, Stat<Integer, Integer>>> petData = getStatsData().petData;
-                            yield getStatsData(petData, params[2], params[3], params[4], getStatsData().fishTotal);
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    case "item" -> {
-                        if(params.length >= 4) {
-                            Map<String, Stat<Integer, Integer>> itemData = getStatsData().itemData;
-                            yield getStatsData(itemData, params[2], params[3], getStatsData().fishTotal);
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
-
-    private Pair<Boolean, PlaceholderValue> getStatsData(Map<String, Map<String, Stat<Integer, Integer>>> category, String subCategory, String field, String type, int total) {
-        if(Objects.equals(subCategory, "rating")) field = TextHelper.smallCaps(field);
-        Map<String, Stat<Integer, Integer>> subCatMap = category.getOrDefault(subCategory, null);
-        if(subCatMap != null) {
-            return getStatsData(subCatMap, field, type, total);
-        }
-        return PlaceholderHandler.noResult();
-    }
-
-    private Pair<Boolean, PlaceholderValue> getStatsData(Map<String, Stat<Integer, Integer>> subCategory, String field, String type, int total) {
-        Stat<Integer, Integer> stat = subCategory.getOrDefault(field, null);
-        if(stat != null) {
-            return switch (type) {
-                case "count" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(stat.amount()));
-                case "dry_streak" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(total - stat.caughtOn()));
-                default -> PlaceholderHandler.noResult();
-            };
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 

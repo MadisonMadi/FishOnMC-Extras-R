@@ -9,6 +9,7 @@ import dannypx.foe.helper.TextHelper;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.config.Configs;
 import dannypx.foe.screens.element.Element;
+import dannypx.foe.type.StringStyle;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -193,26 +194,17 @@ public class ProfileElement extends Element {
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
                         levelComponent,
                         x + component2x, y + component2y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
                         walletComponent,
                         x + component3x, y + component3y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
                         creditsComponent,
                         x + component4x, y + component4y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
             }
             case TOP_RIGHT -> {
                 guiGraphicsExtractor.text(font,
@@ -224,26 +216,17 @@ public class ProfileElement extends Element {
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
                         levelComponent,
                         x - component2x - levelWidth, y + component2y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
                         walletComponent,
                         x - component3x - walletWidth, y + component3y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font,
                         creditsComponent,
                         x - component4x - creditsWidth, y + component4y,
-                        true,
-                        true,
-                        false,
-                        true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS);
             }
         }
     }

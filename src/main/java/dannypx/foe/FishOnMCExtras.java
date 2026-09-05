@@ -19,6 +19,7 @@ public class FishOnMCExtras implements ModInitializer {
 	public static List<String> AUTHORS = FishOnMCExtras.getAuthors();
 	public static List<String> CONTRIBUTORS = FishOnMCExtras.getContributors();
 	public static Integer HUD_VERSION = FishOnMCExtras.getVersion("hud_version");
+	public static Integer HUD_ICON_VERSION = FishOnMCExtras.getVersion("hud_icon_version");
 	public static Integer BUTTON_VERSION = FishOnMCExtras.getVersion("button_version");
 	public static Integer NOTIFICATION_VERSION = FishOnMCExtras.getVersion("notification_version");
 	public static Integer CHAT_NOTIFICATION_VERSION = FishOnMCExtras.getVersion("chat_notification_version");

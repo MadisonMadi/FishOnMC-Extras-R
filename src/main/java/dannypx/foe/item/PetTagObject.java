@@ -23,6 +23,7 @@ public class PetTagObject extends TagObject {
     public static final String MAX_BASE = "cur_max";
     public static final String ITEM = "item";
     public static final String SKIN = "skin";
+    public static final String TRAIL = "trail";
 
     public static final int RATING_LINE = 15;
     public static final int RATING_SIBLING = 2;

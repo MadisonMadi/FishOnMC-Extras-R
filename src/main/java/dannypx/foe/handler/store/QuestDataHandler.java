@@ -6,15 +6,12 @@ import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
 import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.fetch.QuestScreenHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.item.FishTagObject;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.StringValue;
-import dannypx.foe.type.placeholder.ComponentValue;
+
 import java.util.*;
-import java.util.regex.Pattern;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -34,32 +31,6 @@ public class QuestDataHandler extends Handler {
 
     public QuestDataModel getQuestData() {
         return questData;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getQuestData(String[] params) {
-        if(params.length > 0) {
-            Pattern intPattern = Pattern.compile("^-?\\d+$");
-            Pattern questPattern = Pattern.compile("^(goal|max|current)$");
-
-            if(Objects.equals(params[0], "data")
-                    && params.length == 3
-                    && intPattern.matcher(params[1]).matches()
-                    && questPattern.matcher(params[2]).matches()
-            ) {
-                String location = BossEventHandler.instance().getLocation().getString();
-                List<Quest> questData = this.getQuestData().questList.getOrDefault(location, new ArrayList<>());
-                int index = Integer.parseInt(params[1]);
-                if(questData.size() > index) {
-                    return switch (params[2]) {
-                        case "goal" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(ConstantDataHandler.instance().getConstantFishComponent(questData.get(index).goal)));
-                        case "max" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(questData.get(index).max));
-                        case "current" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(questData.get(index).current));
-                        default -> PlaceholderHandler.noResult();
-                    };
-                }
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
 
     public void setQuestData(QuestDataModel questData) {

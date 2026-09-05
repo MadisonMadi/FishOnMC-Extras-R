@@ -8,15 +8,6 @@ public enum Operator {
     LESS_EQUAL("<="),
     GREATER(">"),
     LESS("<"),
-
-    SEPARATOR(","),
-
-    ADDITION("\\+"),
-    SUBTRACTION("\\-"),
-    MULTIPLICATION("\\*"),
-    DIVISION("\\/"),
-    MODULO("\\%"),
-    POWER("\\^")
     ;
 
     public final String symbol;

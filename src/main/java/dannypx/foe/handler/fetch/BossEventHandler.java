@@ -2,14 +2,11 @@ package dannypx.foe.handler.fetch;
 
 import com.google.gson.*;
 import dannypx.foe.handler.Handler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.ComponentValue;
 import dannypx.foe.mixin.accessor.BossHealthOverlayAccessor;
 import java.util.*;
-import java.util.regex.Pattern;
+
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -53,6 +50,8 @@ public class BossEventHandler extends Handler {
     private MutableComponent time = Component.empty();
     private MutableComponent temperature = Component.empty();
     private MutableComponent subLocation = Component.empty();
+    private MutableComponent communityGoalCurrent = Component.empty();
+    private MutableComponent communityGoalMax = Component.empty();
     private String prevBossEvent = "";
 
     public MutableComponent getLocation() {
@@ -75,24 +74,12 @@ public class BossEventHandler extends Handler {
         return subLocation;
     }
 
-    public Pair<Boolean, PlaceholderValue> getBossBar(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(location|weather|time|temperature|sub_location)$");
+    public MutableComponent getCommunityGoalCurrent() {
+        return communityGoalCurrent;
+    }
 
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "location" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getLocation()));
-                    case "weather" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getWeather()));
-                    case "time" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getTime()));
-                    case "temperature" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getTemperature()));
-                    case "sub_location" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getSubLocation()), true);
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
+    public MutableComponent getCommunityGoalMax() {
+        return communityGoalMax;
     }
     //endregion
 
@@ -161,6 +148,20 @@ public class BossEventHandler extends Handler {
                                 temperature = Component.literal(temperatureObject.get("text").getAsString().trim())
                                         .withColor(TextColor.parseColor(temperatureObject.get("color").getAsString()).getOrThrow().getValue());
                             }
+                        }
+
+                        if(jsonObject.get("extra").getAsJsonArray().size() > 4 && lerpingBossEvent.getName().getString().contains("Community Goal:")) {
+                            JsonObject communityGoalObject = jsonObject.get("extra").getAsJsonArray().get(4).getAsJsonObject()
+                                    .get("extra").getAsJsonArray().get(0).getAsJsonObject().get("extra").getAsJsonArray().get(0).getAsJsonObject();
+
+                            communityGoalCurrent = Component.literal(communityGoalObject.get("text").getAsString().trim())
+                                    .withColor(TextColor.parseColor(communityGoalObject.get("color").getAsString()).getOrThrow().getValue());
+
+                            JsonObject communityGoalMaxObject = communityGoalObject.get("extra").getAsJsonArray().get(0).getAsJsonObject()
+                                    .get("extra").getAsJsonArray().get(0).getAsJsonObject();
+
+                            communityGoalMax = Component.literal(communityGoalMaxObject.get("text").getAsString().trim())
+                                    .withColor(TextColor.parseColor(communityGoalMaxObject.get("color").getAsString()).getOrThrow().getValue());
                         }
                     }
                 } else if(lerpingBossEvent.getName().getString().contains("\uA201\uEEE1\uA208")) {

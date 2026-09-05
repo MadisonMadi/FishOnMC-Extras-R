@@ -8,6 +8,7 @@ import me.fzzyhmstrs.fzzy_config.config.Config;
 import me.fzzyhmstrs.fzzy_config.config.ConfigGroup;
 import me.fzzyhmstrs.fzzy_config.screen.context.ContextInput;
 import me.fzzyhmstrs.fzzy_config.util.Translatable;
+import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedBoolean;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedEnum;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedKeybind;
 import net.minecraft.resources.Identifier;
@@ -33,6 +34,10 @@ public class KeyBindConfig extends Config {
     @ConfigGroup.Pop
     @Name("Button mode")
     public ValidatedEnum<KeyBindMode> inspectMode = new ValidatedEnum<>(KeyBindMode.HOLD, ValidatedEnum.WidgetType.CYCLING);
+
+    @Name("Enable page scrolling with scroll wheel")
+    public ValidatedBoolean scrollWheelScrolling = new ValidatedBoolean(true);
+
 
     @Override
     public @NotNull FileType fileType() {

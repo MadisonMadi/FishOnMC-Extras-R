@@ -11,6 +11,7 @@ import dannypx.foe.type.placeholder.PlaceholderValue;
 import dannypx.foe.type.placeholder.ComponentValue;
 import dannypx.foe.type.tuple.Pair;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,26 +33,13 @@ public class ChatHandler extends Handler {
     //region Fields
     private Map<String, Component> storedChatTriggerComponent = new HashMap<>();
 
+    public Map<String, Component> getStoredChatTriggerComponent() {
+        return Collections.unmodifiableMap(storedChatTriggerComponent);
+    }
+
     final List<String> blacklistedMessageFilters = List.of(
             "REACTIONS »"
     );
-
-    public Pair<Boolean, PlaceholderValue> getChat(String[] params) {
-        if(params.length > 1
-                && minecraft.player != null
-        ) {
-            Pattern fieldPattern = Pattern.compile("^(trigger)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-            ) {
-                return switch(params[0]) {
-                    case "trigger" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(storedChatTriggerComponent.getOrDefault(params[1], Component.empty())));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
     //endregion
 
     //region Methods
@@ -83,8 +71,10 @@ public class ChatHandler extends Handler {
     private void checkPet(Component component) {
         if(component.getString().startsWith("PETS » Equipped your")) {
             ProfileDataHandler.instance().updatePet(true);
+            EventHandler.instance().onPetEquip();
         } else if (component.getString().startsWith("PETS » Pet unequipped!")) {
             ProfileDataHandler.instance().updatePet(false);
+            EventHandler.instance().onPetUnequip();
         } else if(component.getString().startsWith("CREWS » Crew Chat has been enabled")) {
             ProfileDataHandler.instance().updateCrewChat(true);
         } else if(component.getString().startsWith("CREWS » Crew Chat has been disabled")) {
@@ -113,7 +103,8 @@ public class ChatHandler extends Handler {
                         && trigger.isUseChatTrigger()
                 ) {
                     CodeExecuterHandler.runLater(1, () -> {
-                        NotifierHandler.instance().notifyOnTrigger(trigger.getNotificationToTrigger());
+                        String[] notificationIds = trigger.getNotificationToTrigger().split(",");
+                        NotifierHandler.instance().notifyOnTrigger(notificationIds);
                     });
                 }
 
@@ -122,7 +113,8 @@ public class ChatHandler extends Handler {
                         && trigger.isUseChatTrigger()
                 ) {
                     CodeExecuterHandler.runLater(1, () -> {
-                        ChatNotifierHandler.instance().notifyChatOnTrigger(trigger.getChatNotificationToTrigger());
+                        String [] chatNotificationIds = trigger.getChatNotificationToTrigger().split(",");
+                        ChatNotifierHandler.instance().notifyChatOnTrigger(chatNotificationIds);
                     });
                 }
 
@@ -131,7 +123,8 @@ public class ChatHandler extends Handler {
                         && trigger.isUseChatTrigger()
                 ) {
                     CodeExecuterHandler.runLater(1, () -> {
-                        CustomTrackerDataHandler.instance().updateTracker(trigger.getTrackerToTrigger());
+                        String[] trackerIds = trigger.getTrackerToTrigger().split(",");
+                        CustomTrackerDataHandler.instance().updateTracker(trackerIds);
                     });
                 }
             }

@@ -1,14 +1,11 @@
 package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.ComponentValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.regex.Pattern;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -47,39 +44,6 @@ public class HitResultHandler extends Handler {
     public @Nullable ItemStack getItemFrameItem() {
         return itemFrameItem;
     }
-
-    public Pair<Boolean, PlaceholderValue> getRayCast(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(block_hit_result|entity_hit_result|item_frame_item)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "block_hit_result" -> {
-                        if(getBlockHitResult() != null && !getBlockFromHitResult().getString().contains("Air")) {
-                            yield PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getBlockFromHitResult()));
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    case "entity_hit_result" -> {
-                        if(getEntityHitResult() != null && !getEntityHitResult().getEntity().getName().getString().isBlank()) {
-                            yield PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getEntityHitResult().getEntity().getName()));
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    case "item_frame_item" -> {
-                        if(getItemFrameItem() != ItemStack.EMPTY) {
-                            yield PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getItemFrameItem().getHoverName()));
-                        }
-                        yield PlaceholderHandler.noResult();
-                    }
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
-    }
     //endregion
 
     //region Methods
@@ -103,7 +67,7 @@ public class HitResultHandler extends Handler {
         }
     }
 
-    private MutableComponent getBlockFromHitResult() {
+    public MutableComponent getBlockFromHitResult() {
         if(getBlockHitResult() != null && minecraft.level != null) {
             BlockPos blockPos = getBlockHitResult().getBlockPos();
             Block block = minecraft.level.getBlockState(blockPos).getBlock();

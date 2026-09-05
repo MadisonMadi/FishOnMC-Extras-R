@@ -1,16 +1,16 @@
 package dannypx.foe.handler.store;
 
+import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
 import dannypx.foe.handler.logic.NotifierHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.StringValue;
+
 import java.util.*;
-import java.util.regex.Pattern;
+
+import dannypx.foe.type.version.Version;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -42,27 +42,6 @@ public class ProfileDataHandler extends Handler {
             DataFileHandler.instance().saveToFile(DataModels.DataModelType.PROFILE_DATA);
         }
         this.needsUpdate = false;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getProfileData(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(active_pet_slot|has_imported_stats|is_in_crew_chat|has_imported_crew|tournament_contribution)$");
-
-            if(Objects.equals(params[0], "data")
-                    && params.length >= 2
-                    && fieldPattern.matcher(params[1]).matches()
-            ) {
-                return switch(params[1]) {
-                    case "active_pet_slot" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getProfileData().activePetSlot));
-                    case "has_imported_stats" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getProfileData().hasImportedStats));
-                    case "is_in_crew_chat" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getProfileData().isInCrewChat));
-                    case "has_imported_crew" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getProfileData().hasImportedCrew));
-                    case "tournament_contribution" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(getProfileData().tournamentContribution));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 
@@ -131,11 +110,20 @@ public class ProfileDataHandler extends Handler {
             }
         }
     }
+
+    public void updateVersion() {
+        if(!Version.of(profileData.modVersion).equals(Version.of(FishOnMCExtras.VERSION))) {
+            profileData.modVersion = Version.of(FishOnMCExtras.VERSION).toString();
+            this.needsUpdate = true;
+        }
+    }
     //endregion
 
     //region Model
     public static class ProfileDataModel extends DataModels.DataModel {
         private static final String PROFILE_DATA_MODEL_VERSION = "0.5";
+
+        public String modVersion = "0";
 
         public int activePetSlot = -1;
         public boolean hasImportedStats = false;

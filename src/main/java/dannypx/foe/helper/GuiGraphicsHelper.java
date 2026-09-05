@@ -1,117 +1,131 @@
 package dannypx.foe.helper;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import dannypx.foe.type.StringStyle;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.render.state.GuiTextRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.CommonColors;
+import org.joml.Matrix3x2f;
 
 public class GuiGraphicsHelper {
-    private static final AtomicInteger translationX = new AtomicInteger(0);
-    public static void text(GuiGraphicsExtractor guiGraphicsExtractor, Font font, Component component, int x, int y, boolean shadow, boolean middle, boolean hasCustomFont, boolean smallCaps) {
-        translationX.set(x);
-        text(guiGraphicsExtractor, font, component, y, shadow, middle, hasCustomFont, smallCaps);
+    public static void drawString(GuiGraphics guiGraphics, Font font, Component component, int x, int y, StringStyle... stringStyles) {
+        EnumSet<StringStyle> styles = stringStyles.length == 0
+                ? EnumSet.noneOf(StringStyle.class)
+                : EnumSet.copyOf(Arrays.asList(stringStyles));
+        drawString(guiGraphics, font, component, x, y, styles);
     }
 
-    private static void text(GuiGraphicsExtractor guiGraphicsExtractor, Font font, Component component, int y, boolean shadow, boolean middle, boolean hasCustomFont, boolean smallCaps) {
+    private static int drawString(GuiGraphics guiGraphics, Font font, Component component, int x, int y, EnumSet<StringStyle> styles) {
         List<Component> siblings = component.getSiblings();
 
-        if(siblings.isEmpty()) {
-            text(guiGraphicsExtractor, font, component.getString(), translationX.get(), y, component.getStyle(), shadow, middle, hasCustomFont, smallCaps);
-
-            int width = font.width(component);
-            if(smallCaps) {
-                width = font.width(Component.literal(TextHelper.smallCaps(component.getString())).setStyle(component.getStyle()));
-            }
-
-            translationX.set(translationX.get() + width);
-        } else {
-            siblings.forEach(text1 -> text(guiGraphicsExtractor, font, text1, y, shadow, middle, hasCustomFont, smallCaps));
+        if (siblings.isEmpty()) {
+            return drawGlyphs(guiGraphics, font, component.getString(), x, y, component.getStyle(), styles);
         }
+
+        for (Component sibling : siblings) {
+            x = drawString(guiGraphics, font, sibling, x, y, styles);
+        }
+        return x;
     }
 
-    private static void text(GuiGraphicsExtractor guiGraphicsExtractor, Font font, String text, int x, int y, Style style, boolean shadow, boolean middle, boolean hasCustomFont, boolean smallCaps) {
-        text(guiGraphicsExtractor, font, text.chars().mapToObj(c -> (char) c).collect(Collectors.toList()), x, y, style, shadow, middle, hasCustomFont, smallCaps);
-    }
+    private static int drawGlyphs(GuiGraphics guiGraphics, Font font, String text, int x, int y, Style style, EnumSet<StringStyle> styles) {
+        boolean shadow = styles.contains(StringStyle.SHADOW);
+        boolean middle = styles.contains(StringStyle.MIDDLE);
+        boolean hasCustomFont = styles.contains(StringStyle.HAS_CUSTOM_FONT);
+        boolean smallCaps = styles.contains(StringStyle.SMALL_CAPS);
 
-    private static void text(GuiGraphicsExtractor guiGraphicsExtractor, Font font, List<Character> characterList, int x, int y, Style style, boolean shadow, boolean middle, boolean hasCustomFont, boolean smallCaps) {
-        if (!characterList.isEmpty()) {
-            String glyph = popNextGlyph(characterList);
+        Deque<Character> characters = text.chars()
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.toCollection(ArrayDeque::new));
 
+        while (!characters.isEmpty()) {
+            String glyph = popNextGlyph(characters);
             if (smallCaps) {
                 glyph = TextHelper.smallCaps(glyph);
             }
 
             int cWidth = font.width(Component.literal(glyph).setStyle(style));
+            int yAdjust = computeYAdjustment(glyph, middle, hasCustomFont, smallCaps);
 
-            int translateY = middle ? -1 : 0;
-
-            int offsetY = 0;
-            if(glyph.length() == 1) {
-                if (TextHelper.isSmallNumber(glyph.charAt(0))) {
-                    offsetY = 1;
-                } else if (TextHelper.isSmallLetter(glyph.charAt(0)) || (hasCustomFont && TextHelper.isCustomFont(glyph.charAt(0)))) {
-
-                } else {
-                    translateY = 0;
-                }
-            }
-
-            guiGraphicsExtractor.text(
-                    font,
-                    Component.literal(glyph).setStyle(style),
-                    x,
-                    y - offsetY + translateY,
-                    CommonColors.WHITE,
-                    shadow
+            guiGraphics.guiRenderState.submitText(
+                    new GuiTextRenderState(
+                            font,
+                            Component.literal(glyph).setStyle(style).getVisualOrderText(),
+                            new Matrix3x2f(guiGraphics.pose()),
+                            x, y - yAdjust, CommonColors.WHITE,
+                            0, shadow, false, guiGraphics.scissorStack.peek()
+                    )
             );
 
-            text(guiGraphicsExtractor, font, characterList, x + cWidth, y, style, shadow, middle, hasCustomFont, smallCaps);
+            x += cWidth;
         }
+
+        return x;
     }
 
-    private static String popNextGlyph(List<Character> characterList) {
-        if (characterList.isEmpty()) return "";
+    private static int computeYAdjustment(String glyph, boolean middle, boolean hasCustomFont, boolean smallCaps) {
+        int translateY = middle ? -1 : 0;
+        int offsetY = 0;
 
-        StringBuilder sb = new StringBuilder();
-        char first = characterList.removeFirst();
-        sb.append(first);
+        if (glyph.length() == 1) {
+            char c = glyph.charAt(0);
+            if (TextHelper.isSmallNumber(c)) {
+                offsetY = 1;
+            } else if (hasCustomFont && smallCaps && TextHelper.isRank(c)) {
+                offsetY = -1;
+            } else if (TextHelper.isSmallLetter(c) || (hasCustomFont && TextHelper.isCustomFont(c))) {
 
-        if (Character.isHighSurrogate(first) && !characterList.isEmpty() && Character.isLowSurrogate(characterList.get(0))) {
-            sb.append(characterList.removeFirst());
+            } else {
+                translateY = 0;
+            }
         }
 
-        while (!characterList.isEmpty()) {
-            char next = characterList.getFirst();
+        return offsetY - translateY;
+    }
 
-            int codePoint;
+    private static String popNextGlyph(Deque<Character> characters) {
+        if (characters.isEmpty()) return "";
 
-            if (Character.isHighSurrogate(next) && characterList.size() > 1 && Character.isLowSurrogate(characterList.get(1))) {
-                codePoint = Character.toCodePoint(next, characterList.get(1));
-            } else {
-                codePoint = next;
-            }
+        StringBuilder sb = new StringBuilder();
+        char first = characters.pollFirst();
+        sb.append(first);
 
-            if (next == '\uFE0F' || next == '\uFE0E' || next == '\u200D'
-                    || (codePoint >= 0x1_F3FB && codePoint <= 0x1F3FF)) {
+        if (Character.isHighSurrogate(first) && !characters.isEmpty() && Character.isLowSurrogate(characters.peekFirst())) {
+            sb.append(characters.pollFirst());
+        }
 
-                sb.append(characterList.removeFirst());
+        while (!characters.isEmpty()) {
+            char next = characters.peekFirst();
+            int codePoint = (Character.isHighSurrogate(next) && characters.size() > 1 && Character.isLowSurrogate(peekSecond(characters)))
+                    ? Character.toCodePoint(next, peekSecond(characters))
+                    : next;
 
-                if (Character.isSupplementaryCodePoint(codePoint)) {
-                    sb.append(characterList.removeFirst());
-                }
+            boolean isModifier = next == '\uFE0F' || next == '\uFE0E' || next == '\u200D'
+                    || (codePoint >= 0x1_F3FB && codePoint <= 0x1F3FF);
 
-            } else {
-                break;
+            if (!isModifier) break;
+
+            sb.append(characters.pollFirst());
+            if (Character.isSupplementaryCodePoint(codePoint)) {
+                sb.append(characters.pollFirst());
             }
         }
         return sb.toString();
     }
 
-    public static void drawHorizontalGradient(GuiGraphicsExtractor guiGraphicsExtractor, int x1, int y1, int x2, int y2, int leftColor, int rightColor) {
+    private static Character peekSecond(Deque<Character> characters) {
+        Iterator<Character> it = characters.iterator();
+        it.next();
+        return it.next();
+    }
+
+    public static void drawHorizontalGradient(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int leftColor, int rightColor) {
         int width = x2 - x1;
         for (int i = 0; i < width; i++) {
             float t = i / (float) (width - 1);
@@ -121,11 +135,11 @@ public class GuiGraphicsHelper {
             int a = (int) ( ((leftColor >> 24 & 0xFF) * (1 - t)) + ((rightColor >> 24 & 0xFF) * t) );
 
             int color = (a << 24) | (r << 16) | (g << 8) | b;
-            guiGraphicsExtractor.fill(x1 + i, y1, x1 + i + 1, y2, color);
+            guiGraphics.fill(x1 + i, y1, x1 + i + 1, y2, color);
         }
     }
 
-    public static void drawLine(GuiGraphicsExtractor guiGraphicsExtractor,
+    public static void drawLine(GuiGraphics guiGraphics,
                                 int x1, int y1,
                                 int x2, int y2,
                                 int color) {
@@ -137,7 +151,7 @@ public class GuiGraphicsHelper {
         int err = dx + dy;
 
         while (true) {
-            guiGraphicsExtractor.fill(x1, y1, x1 + 1, y1 + 1, color);
+            guiGraphics.fill(x1, y1, x1 + 1, y1 + 1, color);
 
             if (x1 == x2 && y1 == y2) break;
             int e2 = 2 * err;

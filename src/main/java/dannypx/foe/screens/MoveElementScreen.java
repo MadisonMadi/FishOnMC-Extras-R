@@ -1,6 +1,7 @@
 package dannypx.foe.screens;
 
 import dannypx.foe.handler.store.CustomHudDataHandler;
+import dannypx.foe.handler.store.CustomHudIconDataHandler;
 import dannypx.foe.type.Alignment;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.config.Configs;
@@ -35,7 +36,10 @@ public class MoveElementScreen extends DefaultModScreen {
 
     private void assembleCustomHudElements() {
         customHudElements.clear();
-        CustomHudDataHandler.instance().getCustomHudData().customHudRawDataList.forEach((key, hud) -> customHudElements.add(Pair.of(key, new CustomHudElement(hud, Component.literal(key)))));
+        CustomHudDataHandler.instance().getCustomHudData().customHudRawDataList
+                .forEach((key, hud) -> customHudElements.add(Pair.of(key, new CustomHudElement(hud, Component.literal(key)))));
+        CustomHudIconDataHandler.instance().getCustomHudIconData().customHudIconDataList
+                .forEach((key, icon) -> customHudElements.add(Pair.of(key, new CustomHudIconElement(icon, Component.literal(key)))));
     }
 
     @Override
@@ -141,21 +145,45 @@ public class MoveElementScreen extends DefaultModScreen {
                 }
         ));
 
-        customHudElements.forEach(element -> widgets.add(new MovableBoxWidget(this.minecraft,
-                element.value2(),
-                Alignment.getAll(),
-                new MovableBoxWidget.Callback() {
-                    @Override
-                    public void onRelease(int xPercent, int yPercent, Alignment alignment) {
-                        CustomHudDataHandler.instance().updateHud(element.value1(), xPercent, yPercent, alignment);
-                    }
+        customHudElements.forEach(element -> {
+            switch (element.value2()) {
+                case CustomHudElement ignored -> {
+                    widgets.add(new MovableBoxWidget(this.minecraft,
+                            element.value2(),
+                            Alignment.getAll(),
+                            new MovableBoxWidget.Callback() {
+                                @Override
+                                public void onRelease(int xPercent, int yPercent, Alignment alignment) {
+                                    CustomHudDataHandler.instance().updateHud(element.value1(), xPercent, yPercent, alignment);
+                                }
 
-                    @Override
-                    public void onConfig() {
-                        Minecraft.getInstance().setScreen(new CustomHudMakerScreen(Minecraft.getInstance().screen));
-                    }
+                                @Override
+                                public void onConfig() {
+                                    Minecraft.getInstance().setScreen(new CustomHudMakerScreen(Minecraft.getInstance().screen));
+                                }
+                            }
+                    ));
                 }
-        )));
+                case CustomHudIconElement ignored -> {
+                    widgets.add(new MovableBoxWidget(this.minecraft,
+                            element.value2(),
+                            Alignment.getAll(),
+                            new MovableBoxWidget.Callback() {
+                                @Override
+                                public void onRelease(int xPercent, int yPercent, Alignment alignment) {
+                                    CustomHudIconDataHandler.instance().updateHudIcon(element.value1(), xPercent, yPercent, alignment);
+                                }
+
+                                @Override
+                                public void onConfig() {
+                                    Minecraft.getInstance().setScreen(new CustomHudIconMakerScreen(Minecraft.getInstance().screen));
+                                }
+                            }
+                    ));
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + element.value2());
+            }
+        });
 
         if(Configs.debugConfig.debugMode.get()) {
             widgets.add(new MovableBoxWidget(this.minecraft,

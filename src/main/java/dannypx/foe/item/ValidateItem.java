@@ -13,13 +13,26 @@ public class ValidateItem {
     private static final String PET = "pet";
     private static final String ARMOR = "armor";
 
-    public static Pair<Boolean, TagObject> isServerItem(ItemStack itemStack) {
+    private static Pair<Boolean, TagObject> isServerItem(ItemStack itemStack) {
         return isValidItem(itemStack);
     }
 
     public static Pair<Boolean, TagObject> isServerItem(ItemStack itemStack, Item itemType) {
         //isValidItem
         return Pair.of(itemStack.getItem() == itemType, isValidItem(itemStack).value2());
+    }
+
+    public static Pair<Boolean, TagObject> isServerItem(ItemStack itemStack, boolean isStrictValidation) {
+        return isStrictValidation ? isServerItem(itemStack) : isLoreItem(itemStack);
+    }
+
+    public static Pair<Boolean, TagObject> isLoreItem(ItemStack itemStack) {
+        if(!itemStack.isEmpty()) {
+            CompoundTag compoundTag = ItemStackHelper.getTag(itemStack);
+            return Pair.of(hasLore(itemStack),
+                    TagObject.of(compoundTag, itemStack));
+        }
+        return Pair.ofFalse(TagObject.of(new CompoundTag(), itemStack));
     }
 
     private static Pair<Boolean, TagObject> isValidItem(ItemStack itemStack) {

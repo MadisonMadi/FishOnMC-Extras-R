@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import dannypx.foe.FishOnMCExtras;
+import dannypx.foe.config.Configs;
 import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.store.CustomNotificationDataHandler;
 import dannypx.foe.helper.TextHelper;
@@ -329,7 +330,7 @@ public class CustomNotificationMakerScreen extends Screen implements ScreenConst
 
     private AbstractWidget wikiButton() {
         return Button.builder(Component.literal("Wiki"), button -> {
-                    String url = "https://github.com/DannyPX/FishOnMC-Extras-R/wiki/Placeholders";
+                    String url = Configs.mainConfig.wikiPageUrl.get();
 
                     this.minecraft.setScreen(new ConfirmLinkScreen((confirmed) -> {
                         if (confirmed) {

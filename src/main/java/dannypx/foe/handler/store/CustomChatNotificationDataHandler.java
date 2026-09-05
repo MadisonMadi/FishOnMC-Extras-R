@@ -116,7 +116,7 @@ public class CustomChatNotificationDataHandler extends Handler {
 
         private static final Map<String, String> defaultNotifications = Map.of(
             "Variant Notification",
-                "%or.(<or.(<condition.(<catch.last_caught.fish.variant.name>=albino)>,<condition.(<catch.last_caught.fish.variant.name>=melanistic)>)>,<or.(<condition.(<catch.last_caught.fish.variant.name>=trophy)>,false)>)%&7Caught a %catch.last_caught.fish.variant.icon% &7fish with a drystreak of &e%catch.last_caught.fish.variant.last_drystreak%"
+                "%hide_line.(<not.(<or.(<condition.(<catch.last_caught.fish.variant.id>==\"albino\")>,<condition.(<catch.last_caught.fish.variant.id>==\"melanistic\")>,<condition.(<catch.last_caught.fish.variant.id>==\"trophy\")>)>)>)%&7Caught a &r%catch.last_caught.fish.variant.icon% &7fish with a drystreak of &e%catch.last_caught.fish.variant.last_drystreak%"
         );
 
         //Name Notification, Notification

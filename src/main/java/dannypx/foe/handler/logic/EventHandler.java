@@ -62,12 +62,33 @@ public class EventHandler extends Handler {
         this.sendEventTrigger(EventTrigger.ON_QUEST_COMPLETE);
     }
 
+    public void onScreenOpen() {
+        this.sendEventTrigger(EventTrigger.ON_SCREEN_OPEN);
+    }
+
+    public void onScreenClose() {
+        this.sendEventTrigger(EventTrigger.ON_SCREEN_CLOSE);
+    }
+
+    public void onPetEquip() {
+        this.sendEventTrigger(EventTrigger.ON_PET_EQUIP);
+    }
+
+    public void onPetUnequip() {
+        this.sendEventTrigger(EventTrigger.ON_PET_UNEQUIP);
+    }
+
     private void sendEventTrigger(EventTrigger eventTrigger) {
         CustomEventTriggerDataHandler.instance().getCustomEventTriggerData().eventTriggerList.forEach((name, event) -> {
             if(event.isUseEventTrigger() && event.getEvent() == eventTrigger) {
-                NotifierHandler.instance().notifyOnTrigger(event.getNotificationToTrigger());
-                ChatNotifierHandler.instance().notifyChatOnTrigger(event.getChatNotificationToTrigger());
-                CustomTrackerDataHandler.instance().updateTracker(event.getTrackerToTrigger());
+                String[] notificationIds = event.getNotificationToTrigger().split(",");
+                NotifierHandler.instance().notifyOnTrigger(notificationIds);
+
+                String[] chatNotificationIds = event.getChatNotificationToTrigger().split(",");
+                ChatNotifierHandler.instance().notifyChatOnTrigger(chatNotificationIds);
+
+                String[] trackerIds = event.getTrackerToTrigger().split(",");
+                CustomTrackerDataHandler.instance().updateTracker(trackerIds);
             }
         });
     }

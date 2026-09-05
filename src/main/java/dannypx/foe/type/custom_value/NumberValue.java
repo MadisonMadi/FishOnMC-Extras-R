@@ -1,26 +1,21 @@
 package dannypx.foe.type.custom_value;
 
-public record NumberValue(float value) implements TrackerValue {
+public record NumberValue(Float value) implements TrackerValue {
     @Override
-    public TrackerValue setValue(float value) {
-        return new NumberValue(value);
+    public <F> TrackerValue addValue(F value) {
+        return new NumberValue(this.value + (Float) value);
     }
 
     @Override
-    public TrackerValue addValue(float value) {
-        return new NumberValue(this.value + value);
-    }
-
-    @Override
-    public TrackerValue subtractValue(float value) {
-        return new NumberValue(this.value - value);
+    public <F> TrackerValue subtractValue(F value) {
+        return new NumberValue(this.value - (Float) value);
     }
 
     public static TrackerValue getDefault() {
-        return new NumberValue(0);
+        return new NumberValue(0f);
     }
 
-    public static TrackerValue of(float value) {
+    public static TrackerValue of(Float value) {
         return new NumberValue(value);
     }
 }

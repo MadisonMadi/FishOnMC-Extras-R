@@ -3,11 +3,14 @@ package dannypx.foe.screens.element.hud;
 import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.handler.fetch.TabOverlayHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
+import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.store.CustomHudDataHandler;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.helper.TextHelper;
+import dannypx.foe.placeholder.evaluator.PlaceholderResult;
+import dannypx.foe.placeholder.handler.PlaceholderHandlerV2;
 import dannypx.foe.type.Alignment;
+import dannypx.foe.type.StringStyle;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.type.tuple.Triplet;
 import dannypx.foe.screens.element.Element;
@@ -18,11 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 
 public class CustomHudElement extends Element implements ScreenConstants {
@@ -57,14 +58,14 @@ public class CustomHudElement extends Element implements ScreenConstants {
 
     //region Methods
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         if(!customHud.isShowElement()) { return; }
 
         int scaledWidth = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * (1 / customHud.getScale()));
         int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * (1 / customHud.getScale()));
 
-        guiGraphicsExtractor.pose().pushMatrix();
-        guiGraphicsExtractor.pose().scale(customHud.getScale(), customHud.getScale());
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().scale(customHud.getScale(), customHud.getScale());
         if(LoadingHandler.instance().isLoadingDone()
                 && TabOverlayHandler.instance().isInInstance()
         ) {
@@ -103,14 +104,14 @@ public class CustomHudElement extends Element implements ScreenConstants {
                     default -> 0;
                 };
 
-                if(customHud.isShowBackground()) this.extractRenderBox(guiGraphicsExtractor, deltaTracker, x, y);
-                this.extractRenderText(guiGraphicsExtractor, deltaTracker, x, y);
+                this.renderBox(guiGraphics, deltaTracker, x, y);
+                this.renderComponent(guiGraphics, deltaTracker, x, y);
             }
         }
-        guiGraphicsExtractor.pose().popMatrix();
+        guiGraphics.pose().popMatrix();
     }
 
-    private void extractRenderText(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker, int x, int y) {
+    private void renderComponent(GuiGraphics guiGraphics, DeltaTracker deltaTracker, int x, int y) {
         int componentX;
         int componentY;
 
@@ -129,22 +130,38 @@ public class CustomHudElement extends Element implements ScreenConstants {
         AtomicInteger line = new AtomicInteger(0);
         componentLines.forEach(componentParts -> {
             if(componentParts.value1()) {
-                GuiGraphicsHelper.text(guiGraphicsExtractor, Minecraft.getInstance().font, componentParts.value3(),
-                        componentX - (PADDING + BOX_PADDING) + boxWidth / 2 - TextHelper.getWidth(Minecraft.getInstance().font, componentParts.value3(), componentParts.value2()) / 2,
-                        componentY + line.getAndIncrement() * LINE_HEIGHT,
-                        true, componentParts.value2(), true, componentParts.value2()
-                        );
+                if(componentParts.value2()) {
+                    GuiGraphicsHelper.drawString(guiGraphics, Minecraft.getInstance().font, componentParts.value3(),
+                            componentX - (PADDING + BOX_PADDING) + boxWidth / 2 - TextHelper.getWidth(Minecraft.getInstance().font, componentParts.value3(), componentParts.value2()) / 2,
+                            componentY + line.getAndIncrement() * LINE_HEIGHT,
+                            StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS
+                    );
+                } else {
+                    GuiGraphicsHelper.drawString(guiGraphics, Minecraft.getInstance().font, componentParts.value3(),
+                            componentX - (PADDING + BOX_PADDING) + boxWidth / 2 - TextHelper.getWidth(Minecraft.getInstance().font, componentParts.value3(), componentParts.value2()) / 2,
+                            componentY + line.getAndIncrement() * LINE_HEIGHT,
+                            StringStyle.SHADOW, StringStyle.HAS_CUSTOM_FONT
+                    );
+                }
             } else {
-                GuiGraphicsHelper.text(guiGraphicsExtractor, Minecraft.getInstance().font, componentParts.value3(),
-                        componentX,
-                        componentY + line.getAndIncrement() * LINE_HEIGHT,
-                        true, componentParts.value2(), true, componentParts.value2()
-                );
+                if(componentParts.value2()) {
+                    GuiGraphicsHelper.drawString(guiGraphics, Minecraft.getInstance().font, componentParts.value3(),
+                            componentX,
+                            componentY + line.getAndIncrement() * LINE_HEIGHT,
+                            StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS
+                    );
+                } else {
+                    GuiGraphicsHelper.drawString(guiGraphics, Minecraft.getInstance().font, componentParts.value3(),
+                            componentX,
+                            componentY + line.getAndIncrement() * LINE_HEIGHT,
+                            StringStyle.SHADOW, StringStyle.HAS_CUSTOM_FONT
+                    );
+                }
             }
         });
     }
 
-    private void extractRenderBox(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker, int x, int y) {
+    private void renderBox(GuiGraphics guiGraphics, DeltaTracker deltaTracker, int x, int y) {
         int boxX = x;
         int boxY = y;
 
@@ -162,14 +179,14 @@ public class CustomHudElement extends Element implements ScreenConstants {
         int NIB_HEIGHT = 3;
 
         // Alpha Box
-        guiGraphicsExtractor.fill(
-                boxX + BOX_PADDING, boxY + BOX_PADDING,
-                boxX + this.boxWidth - BOX_PADDING, boxY + this.boxHeight - BOX_PADDING,
+        if(customHud.isShowBackground()) guiGraphics.fill(
+                boxX + BOX_PADDING, boxY + 1,
+                boxX + this.boxWidth - BOX_PADDING, boxY + this.boxHeight - 3,
                 0x7f000000
         );
 
         // Top Left
-        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED,
+        if(customHud.isShowBars()) guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 BOX_TEXTURE,
                 boxX, boxY,
                 0, NIB_HEIGHT,
@@ -179,7 +196,7 @@ public class CustomHudElement extends Element implements ScreenConstants {
         );
 
         // Top
-        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED,
+        if(customHud.isShowBars())guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 BOX_TEXTURE,
                 boxX + ATLAS_CORNER, boxY,
                 ATLAS_CORNER, NIB_HEIGHT,
@@ -189,7 +206,7 @@ public class CustomHudElement extends Element implements ScreenConstants {
         );
 
         // Top Right
-        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED,
+        if(customHud.isShowBars())guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 BOX_TEXTURE,
                 boxX + this.boxWidth - ATLAS_CORNER, boxY,
                 ATLAS_CORNER + ATLAS_BAR_WIDTH, NIB_HEIGHT,
@@ -199,7 +216,7 @@ public class CustomHudElement extends Element implements ScreenConstants {
         );
 
         // Bottom Left
-        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED,
+        if(customHud.isShowBars())guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 BOX_TEXTURE,
                 boxX, boxY + this.boxHeight - ATLAS_CORNER,
                 0, 0,
@@ -209,7 +226,7 @@ public class CustomHudElement extends Element implements ScreenConstants {
         );
 
         // Bottom
-        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED,
+        if(customHud.isShowBars())guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 BOX_TEXTURE,
                 boxX + ATLAS_CORNER, boxY + this.boxHeight - ATLAS_CORNER + NIB_HEIGHT,
                 ATLAS_CORNER, NIB_HEIGHT,
@@ -219,7 +236,7 @@ public class CustomHudElement extends Element implements ScreenConstants {
         );
 
         // Bottom Right
-        guiGraphicsExtractor.blit(RenderPipelines.GUI_TEXTURED,
+        if(customHud.isShowBars())guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 BOX_TEXTURE,
                 boxX + this.boxWidth - ATLAS_CORNER, boxY + this.boxHeight - ATLAS_CORNER,
                 ATLAS_CORNER + ATLAS_BAR_WIDTH, 0,
@@ -235,12 +252,10 @@ public class CustomHudElement extends Element implements ScreenConstants {
         AtomicBoolean hasData = new AtomicBoolean(false);
 
         customHud.getStringLines().forEach(componentParts -> {
-            String componentString = componentParts.value1().replace("&", "§");
-            Pair<Boolean, MutableComponent> componentLine = PlaceholderHandler.parsePlaceholderFromString(componentString);
-            if(componentLine.value1()) {
-                componentLines.add(Triplet.of(componentParts.value2(), componentParts.value3(), componentLine.value2()));
-            }
-            if(componentLine.value1() && !componentLine.value2().getString().isBlank()) {
+            PlaceholderResult result = PlaceholderHandlerV2.instance().resolve(componentParts.value1());
+
+            if((result.success()[0] && !result.success()[1]) || !result.errors().isEmpty()) {
+                componentLines.add(Triplet.of(componentParts.value2(), componentParts.value3(), result.text()));
                 hasData.set(true);
             }
         });

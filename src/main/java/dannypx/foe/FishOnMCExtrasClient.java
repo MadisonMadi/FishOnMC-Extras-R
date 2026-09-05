@@ -8,6 +8,7 @@ import dannypx.foe.handler.renderer.*;
 import dannypx.foe.handler.store.*;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.config.Configs;
+import dannypx.foe.placeholder.handler.PlaceholderHandlerV2;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,7 +16,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -52,6 +53,8 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
         ScreenEvents.AFTER_INIT.register(this::onAfterInitScreen);
         UseItemCallback.EVENT.register(this::onUseItem);
         ItemTooltipCallback.EVENT.register(this::onItemTooltip);
+
+        this.initHudRenderer();
     }
 
     private void onItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, TooltipFlag tooltipType, List<Component> lines) {
@@ -62,7 +65,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
         if(minecraftClient.options.guiScale().get() == 0) {
             minecraftClient.options.guiScale().set(3);
             minecraftClient.options.save();
-            minecraftClient.resizeGui();
+            minecraftClient.resizeDisplay();
         }
     }
 
@@ -83,21 +86,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
     }
 
     private void onAfterInitScreen(Minecraft minecraft, Screen screen, int scaledWidth, int scaledHeight) {
-        if(screen instanceof InventoryScreen inventoryScreen) {
-            InventoryScreenRenderHandler.instance().init(inventoryScreen);
-            ScreenMouseEvents.afterMouseScroll(inventoryScreen).register(InventoryScreenRenderHandler.instance()::onMouseScrolled);
-        } else if(screen instanceof ContainerScreen genericContainerScreen) {
-            GenericContainerScreenHandler.instance().init(genericContainerScreen);
-            ScreenEvents.afterExtract(screen).register(GenericContainerScreenHandler.instance()::render);
-        } else if(screen instanceof ChatScreen) {
-            ScreenEvents.afterExtract(screen).register(ChatScreenRenderHandler.instance()::render);
-        }
-
-        ScreenEvents.remove(screen).register(this::onRemoveScreen);
-    }
-
-    private void onRemoveScreen(Screen screen) {
-        InventoryHandler.instance().trackFishOffSide();
+        ScreenHander.instance().onAfterInitScreen(minecraft, screen, scaledWidth, scaledHeight);
     }
 
     private void initHudRenderer() {
@@ -108,8 +97,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
         this.registerEntityModels();
         CodeExecuterHandler.instance().init();
         CommandRegistry.init();
-
-        this.initHudRenderer();
+        PlaceholderHandlerV2.instance().init();
     }
 
     private void onLeave(ClientPacketListener clientPacketListener, Minecraft minecraft) {
@@ -129,6 +117,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
             QuestDataHandler.instance().init();
             CrewDataHandler.instance().init();
             CustomHudDataHandler.instance().init();
+            CustomHudIconDataHandler.instance().init();
             CustomButtonDataHandler.instance().init();
             CustomNotificationDataHandler.instance().init();
             CustomChatTriggerDataHandler.instance().init();
@@ -182,6 +171,9 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
                 // Renderer
                 if(Configs.handlerConfig.hudRenderHandler.get()) HudRenderHandler.instance().tick();
 
+                // Placeholder Engine
+                PlaceholderHandlerV2.instance().tick();
+
             } else {
                 if(Configs.handlerConfig.loadingHandler.get()) LoadingHandler.instance().tick();
             }
@@ -189,6 +181,6 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
     }
 
     private void registerEntityModels() {
-        ModelLayerRegistry.registerModelLayer(FishingHookEntityModel.MODEL_LAYER, FishingHookEntityModel::generateModel);
+        EntityModelLayerRegistry.registerModelLayer(FishingHookEntityModel.MODEL_LAYER, FishingHookEntityModel::generateModel);
     }
 }

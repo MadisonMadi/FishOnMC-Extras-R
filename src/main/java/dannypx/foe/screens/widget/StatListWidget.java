@@ -7,6 +7,8 @@ import dannypx.foe.helper.TextHelper;
 import dannypx.foe.screens.interfaces.ScreenConstants;
 import java.util.List;
 import java.util.Objects;
+
+import dannypx.foe.type.StringStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -118,7 +120,7 @@ public class StatListWidget extends AbstractSelectionList<StatListWidget.@NotNul
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font, category,
                         headerX - headerWidth / 2, posY,
-                        true, true, true, true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS);
             } else {
                 Component fieldComponent;
                 if(!itemStacks.isEmpty()) {
@@ -135,11 +137,11 @@ public class StatListWidget extends AbstractSelectionList<StatListWidget.@NotNul
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font, fieldComponent,
                         fieldComponentX, posY,
-                        true, true, true, true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS);
 
                 GuiGraphicsHelper.text(guiGraphicsExtractor, font, thirdColumnField,
                         field3X - field3Width / 2, posY,
-                        true, true, true, true);
+                        StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.HAS_CUSTOM_FONT, StringStyle.SMALL_CAPS);
 
                 if(!itemStacks.isEmpty()) {
                     long seconds = System.currentTimeMillis() / 1000;

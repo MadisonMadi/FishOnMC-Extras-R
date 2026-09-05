@@ -2,15 +2,12 @@ package dannypx.foe.handler.fetch;
 
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.logic.NotifierHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.handler.store.ProfileDataHandler;
 import dannypx.foe.helper.TextHelper;
 import dannypx.foe.type.tuple.Pair;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.StringValue;
-import dannypx.foe.type.placeholder.ComponentValue;
+
 import java.util.*;
-import java.util.regex.Pattern;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.scores.DisplaySlot;
@@ -94,32 +91,6 @@ public class ScoreboardHandler extends Handler {
 
     public MutableComponent getDate() {
         return date;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getScoreboard(String[] params) {
-        if(params.length > 0) {
-            Pattern fieldPattern = Pattern.compile("^(level|wallet|credits|catches|location_min|location_max|catch_rate|crew|crew_nearby|version|date)$");
-
-            if(fieldPattern.matcher(params[0]).matches()
-                    && params.length == 1
-            ) {
-                return switch(params[0]) {
-                    case "level" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(getLevel()));
-                    case "wallet" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getWallet()));
-                    case "credits" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getCredits()));
-                    case "catches" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getCatches()));
-                    case "location_min" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getLocationMin()));
-                    case "location_max" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getLocationMax()));
-                    case "catch_rate" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getCatchRate()));
-                    case "crew" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getCrew()));
-                    case "crew_nearby" -> PlaceholderHandler.getPlaceholderValue(ComponentValue.of(isCrewNearby()));
-                    case "version" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getVersion()));
-                    case "date" -> PlaceholderHandler.getPlaceholderValue(StringValue.toString(getDate()));
-                    default -> PlaceholderHandler.noResult();
-                };
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 

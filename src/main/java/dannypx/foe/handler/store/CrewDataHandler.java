@@ -3,14 +3,10 @@ package dannypx.foe.handler.store;
 import dannypx.foe.handler.Handler;
 import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.io.DataModels;
-import dannypx.foe.handler.logic.CrewHandler;
-import dannypx.foe.handler.logic.PlaceholderHandler;
 import dannypx.foe.helper.TextHelper;
-import dannypx.foe.type.placeholder.PlaceholderValue;
-import dannypx.foe.type.placeholder.StringValue;
 import dannypx.foe.type.tuple.Pair;
 import java.util.*;
-import java.util.regex.Pattern;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -31,31 +27,6 @@ public class CrewDataHandler extends Handler {
 
     public CrewDataModel getCrewData() {
         return crewData;
-    }
-
-    public Pair<Boolean, PlaceholderValue> getCrewData(String[] params) {
-        if(params.length > 0) {
-            Pattern intPattern = Pattern.compile("^-?\\d+$");
-            Pattern crewPattern = Pattern.compile("^(id|name)$");
-
-            if(Objects.equals(params[0], "data")
-                    && params.length == 3
-                    && intPattern.matcher(params[1]).matches()
-                    && crewPattern.matcher(params[2]).matches()
-            ) {
-                int index = Integer.parseInt(params[1]);
-                List<Pair<UUID, String>> crewList = CrewHandler.instance().getCrewListOrdered();
-                if(crewList.size() > index) {
-                    Pair<UUID, String> crew = crewList.get(index);
-                    return switch (params[2]) {
-                        case "id" -> PlaceholderHandler.getPlaceholderValue(StringValue.valueOf(crew.value1()));
-                        case "name" -> PlaceholderHandler.getPlaceholderValue(StringValue.of(crew.value2()));
-                        default -> PlaceholderHandler.noResult();
-                    };
-                }
-            }
-        }
-        return PlaceholderHandler.noResult();
     }
     //endregion
 

@@ -9,18 +9,22 @@ import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.fetch.HitResultHandler;
 import dannypx.foe.handler.store.CustomHudDataHandler;
+import dannypx.foe.handler.store.CustomHudIconDataHandler;
 import dannypx.foe.helper.GuiGraphicsHelper;
 import dannypx.foe.item.TagObject;
 import dannypx.foe.item.ValidateItem;
 import dannypx.foe.config.Configs;
+import dannypx.foe.placeholder.evaluator.PlaceholderResult;
+import dannypx.foe.placeholder.handler.PlaceholderHandlerV2;
 import dannypx.foe.screens.element.*;
+import dannypx.foe.type.StringStyle;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.screens.element.hud.*;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -33,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HudRenderHandler extends Handler {
     private static HudRenderHandler INSTANCE = new HudRenderHandler();
@@ -51,19 +56,28 @@ public class HudRenderHandler extends Handler {
 
     //region Methods
     public void initializeHudRenderer() {
-        renderElements();
+        registerElements();
     }
 
     public void tick() {
-        if(CustomHudDataHandler.instance().needsRenderUpdate) {
+        if(CustomHudDataHandler.instance().needsRenderUpdate || CustomHudIconDataHandler.instance().needsRenderUpdate) {
             customHudElements.clear();
-            CustomHudDataHandler.instance().getCustomHudData().customHudRawDataList.forEach((key, hud) -> customHudElements.add(Pair.of(key, new CustomHudElement(hud, Component.literal(key)))));
+            CustomHudDataHandler.instance().getCustomHudData().customHudRawDataList.forEach((key, hud) -> {
+                LoggerHandler.info("Register Custom Element: " + key);
+                customHudElements.add(Pair.of(key, new CustomHudElement(hud, Component.literal(key))));
+            });
+
+            CustomHudIconDataHandler.instance().getCustomHudIconData().customHudIconDataList.forEach((key, icon) -> {
+                LoggerHandler.info("Register Custom Icon Element: " + key);
+                customHudElements.add(Pair.of(key, new CustomHudIconElement(icon, Component.literal(key))));
+            });
 
             CustomHudDataHandler.instance().needsRenderUpdate = false;
+            CustomHudIconDataHandler.instance().needsRenderUpdate = false;
         }
     }
 
-    private void renderElements() {
+    private void registerElements() {
         if(elements.isEmpty()) {
             elements.add(Pair.of("profile_hud", new ProfileElement()));
             elements.add(Pair.of("location_hud", new LocationElement()));
@@ -73,54 +87,77 @@ public class HudRenderHandler extends Handler {
             elements.add(Pair.of("debug_field_hud", new _DebugField()));
         }
 
-        LoggerHandler._debug("Register Default Elements");
-        elements.forEach(element -> HudElementRegistry.attachElementBefore(VanillaHudElements.EXPERIENCE_LEVEL, Identifier.fromNamespaceAndPath(FishOnMCExtras.MOD_ID, element.value1()), (guiGraphicsExtractor, deltaTracker) -> {
-            if (Configs.mainConfig.enableMod.get()) element.value2().extractRenderState(guiGraphicsExtractor, deltaTracker);
-        }));
 
-        LoggerHandler._debug("Register Custom Elements");
-        HudElementRegistry.attachElementBefore(VanillaHudElements.EXPERIENCE_LEVEL, Identifier.fromNamespaceAndPath(FishOnMCExtras.MOD_ID, "hud_screen"), (guiGraphicsExtractor, deltaTracker) -> {
-            if (Configs.mainConfig.enableMod.get()) this.render(guiGraphicsExtractor, deltaTracker);
+        LoggerHandler.info("Register Elements");
+        HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, Identifier.fromNamespaceAndPath(FishOnMCExtras.MOD_ID, "foer_hud_foreground"), (guiGraphics, deltaTracker) -> {
+            elements.forEach(element -> {
+                if (Configs.mainConfig.enableMod.get()) element.value2().render(guiGraphics, deltaTracker);
+            });
+
+            if (Configs.mainConfig.enableMod.get()) this.render(guiGraphics, deltaTracker);
         });
 
-        LoggerHandler._debug("Register Misc Elements");
-        HudElementRegistry.attachElementBefore(VanillaHudElements.PLAYER_LIST, Identifier.fromNamespaceAndPath(FishOnMCExtras.MOD_ID, "hud_screen_after_subtitles"), (guiGraphicsExtractor, deltaTracker) -> {
-            if (Configs.mainConfig.enableMod.get()) this.renderAfterSubtitles(guiGraphicsExtractor, deltaTracker);
+        LoggerHandler.info("Register Priority Elements");
+        HudElementRegistry.attachElementAfter(VanillaHudElements.EXPERIENCE_LEVEL, Identifier.fromNamespaceAndPath(FishOnMCExtras.MOD_ID, "foer_hud_priority"), (guiGraphics, deltaTracker) -> {
+            if (Configs.mainConfig.enableMod.get()) this.renderAfterSubtitles(guiGraphics, deltaTracker);
         });
     }
 
-    private void render(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
-        customHudElements.forEach(element -> element.value2().extractRenderState(guiGraphicsExtractor, deltaTracker));
+    private void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+        customHudElements.forEach(element -> element.value2().render(guiGraphics, deltaTracker));
     }
 
-    private void renderAfterSubtitles(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker) {
-        this.renderTooltip(guiGraphicsExtractor);
+    private void renderAfterSubtitles(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+        this.renderTooltip(guiGraphics);
 
         if((!LoadingHandler.instance().isLoadingDone()
                 || ScoreboardHandler.instance().isNoScoreboard()
                 || !ScoreboardHandler.instance().getLevel().getString().trim().equals(String.valueOf(LocalPlayerHandler.instance().getExperienceLevel()))) &&
                 ConnectionHandler.instance().isOnServer()
-        ) this.renderLoading(guiGraphicsExtractor);
+        ) this.renderLoading(guiGraphics);
+
+//        if(LoadingHandler.instance().isLoadingDone()) {
+//            int posX = minecraft.getWindow().getGuiScaledWidth() / 2 - 200;
+//            int posY = minecraft.getWindow().getGuiScaledHeight() / 2;
+//
+//            GuiGraphicsHelper.drawString(guiGraphics, minecraft.font, Component.literal("Test"), posX, posY, StringStyle.SHADOW);
+//
+//            List<PlaceholderResult> results = List.of(
+//                    PlaceholderHandlerV2.instance().resolve("%test.segment_first% %test.segment_first%"),
+//                    PlaceholderHandlerV2.instance().resolve("&7fps&8: &e%player.fps%"),
+//                    PlaceholderHandlerV2.instance().resolve("&7x&8: &e%player.pos.x% &8/ &7y&8: &e%player.pos.y% &8/ &7z&8: &e%player.pos.z%"),
+//                    PlaceholderHandlerV2.instance().resolve("%boss_bar.location% | %boss_bar.sub_location%"),
+//                    PlaceholderHandlerV2.instance().resolve("%expression.(<expression.(<player.fps>*10)>*10)%")
+//            );
+//
+//            AtomicInteger line = new AtomicInteger(0);
+//            for (PlaceholderResult result : results) {
+//                GuiGraphicsHelper.drawString(guiGraphics, minecraft.font,
+//                        Component.empty().append(result.success() + " " + result.errors().size() + ": ").append(result.text()),
+//                        posX, posY + (minecraft.font.lineHeight + 2) * line.incrementAndGet(), StringStyle.SHADOW
+//                );
+//            }
+//        }
     }
 
-    private void renderLoading(GuiGraphicsExtractor guiGraphicsExtractor) {
+    private void renderLoading(GuiGraphics guiGraphics) {
         long time = System.currentTimeMillis();
         int dotCount = (int)((time / 1000) % 4);
 
         Component loadingComponent = Component.literal("Loading FOER" + ".".repeat(dotCount));
 
-        GuiGraphicsHelper.text(guiGraphicsExtractor, minecraft.font, loadingComponent,
+        GuiGraphicsHelper.drawString(guiGraphics, minecraft.font, loadingComponent,
                 minecraft.getWindow().getGuiScaledWidth() - minecraft.font.width(loadingComponent) - 8,
                 minecraft.getWindow().getGuiScaledHeight() - minecraft.font.lineHeight - 8,
-                true, true, false, true
+                StringStyle.SHADOW, StringStyle.MIDDLE, StringStyle.SMALL_CAPS
         );
     }
 
-    private void renderTooltip(GuiGraphicsExtractor guiGraphicsExtractor) {
+    private void renderTooltip(GuiGraphics guiGraphics) {
         if (Configs.mainConfig.enableMod.get()
                 && LoadingHandler.instance().isLoadingDone()
                 && HitResultHandler.instance().getItemFrameItem() != ItemStack.EMPTY) {
-            Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(HitResultHandler.instance().getItemFrameItem());
+            Pair<Boolean, TagObject> validatedItem = ValidateItem.isServerItem(HitResultHandler.instance().getItemFrameItem(), true);
             if (validatedItem.value1()) {
                 int itemX = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
                 int itemY = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2;
@@ -136,7 +173,7 @@ public class HudRenderHandler extends Handler {
                                 clientTooltipComponents.add(clientTooltipComponents.isEmpty() ? 0 : 1, ClientTooltipComponent.create(tooltipComponent))
                         );
 
-                guiGraphicsExtractor.tooltip(minecraft.font, clientTooltipComponents, itemX, itemY, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE));
+                guiGraphics.renderTooltip(minecraft.font, clientTooltipComponents, itemX, itemY, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE));
             }
         }
     }

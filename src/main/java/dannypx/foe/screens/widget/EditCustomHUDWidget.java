@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
@@ -41,6 +41,9 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
 
     private final Checkbox showBackgroundCheckBox;
     public boolean showBackground;
+
+    private final Checkbox showBarsCheckBox;
+    public boolean showBars;
 
     private final Checkbox showElementCheckBox;
     public boolean showElement;
@@ -102,18 +105,27 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
 
         showBackgroundCheckBox = Checkbox.builder(Component.literal("Show Background"), minecraft.font)
                 .pos(
-                        getX() + width / 3 + minecraft.font.width("Scale") + PADDING_HALF + 40 + PADDING_HALF,
-                        getY() + headerHeight + PADDING
+                        getX() + PADDING,
+                        getY() + headerHeight + PADDING + editBoxHeight + PADDING
                 )
                 .selected(true)
                 .onValueChange((checkbox, checked) -> showBackground = checked)
                 .build();
         showBackground = true;
 
+        showBarsCheckBox = Checkbox.builder(Component.literal("Show Bars"), minecraft.font)
+                .pos(
+                        getX() + PADDING + minecraft.font.width("Show Background") + PADDING_HALF + 16 + PADDING_HALF,
+                        getY() + headerHeight + PADDING + editBoxHeight + PADDING
+                )
+                .selected(true)
+                .onValueChange((checkbox, checked) -> showBars = checked)
+                .build();
+        showBars = true;
+
         showElementCheckBox = Checkbox.builder(Component.literal("Show Element"), minecraft.font)
                 .pos(
-                        getX() + width / 3 + minecraft.font.width("Scale") + PADDING_HALF + 40 + PADDING_HALF
-                                + minecraft.font.width("Show Background") + PADDING_HALF + 16 + PADDING_HALF,
+                        getX() + width / 3 + minecraft.font.width("Scale") + PADDING_HALF + 40 + PADDING_HALF,
                         getY() + headerHeight + PADDING
                 )
                 .selected(true)
@@ -140,6 +152,10 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
         showBackground = customHud.isShowBackground();
         if(customHud.isShowBackground() != showBackgroundCheckBox.selected()) {
             showBackgroundCheckBox.onPress(null);
+        }
+        showBars = customHud.isShowBars();
+        if(customHud.isShowBars() != showBarsCheckBox.selected()) {
+            showBarsCheckBox.onPress(null);
         }
         showElement = customHud.isShowElement();
         if(customHud.isShowElement() != showElementCheckBox.selected()) {
@@ -213,6 +229,10 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
         if(!showBackgroundCheckBox.selected()) {
             showBackgroundCheckBox.onPress(null);
         }
+        showBars = true;
+        if(!showBarsCheckBox.selected()) {
+            showBarsCheckBox.onPress(null);
+        }
         showElement = true;
         if(!showElementCheckBox.selected()) {
             showElementCheckBox.onPress(null);
@@ -226,13 +246,13 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
     }
 
     @Override
-    protected void extractWidgetRenderState(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
-        int entryStartY = getY() + headerHeight + PADDING + editBoxHeight + PADDING;
+    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        int entryStartY = getY() + headerHeight + PADDING + (editBoxHeight + PADDING) * 2;
 
-        guiGraphicsExtractor.fill(getX(), getY(), getRight(), getBottom(), 0x55000000);
-        guiGraphicsExtractor.horizontalLine(getX(), getRight(), getBottom(), CommonColors.GRAY);
-        guiGraphicsExtractor.verticalLine(getX(), 0, getBottom(), CommonColors.GRAY);
-        guiGraphicsExtractor.centeredText(
+        guiGraphics.fill(getX(), getY(), getRight(), getBottom(), 0x55000000);
+        guiGraphics.hLine(getX(), getRight(), getBottom(), CommonColors.GRAY);
+        guiGraphics.vLine(getX(), 0, getBottom(), CommonColors.GRAY);
+        guiGraphics.drawCenteredString(
                 minecraft.font,
                 header,
                 getX() + width / 2,
@@ -241,7 +261,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
         );
 
         // Draw scale text
-        guiGraphicsExtractor.text(
+        guiGraphics.drawString(
                 minecraft.font,
                 "Scale",
                 getX() + width / 3,
@@ -250,12 +270,13 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
                 true
         );
 
-        idEditBox.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-        scaleEditBox.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-        showBackgroundCheckBox.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-        showElementCheckBox.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
+        idEditBox.render(guiGraphics, mouseX, mouseY, delta);
+        scaleEditBox.render(guiGraphics, mouseX, mouseY, delta);
+        showBackgroundCheckBox.render(guiGraphics, mouseX, mouseY, delta);
+        showBarsCheckBox.render(guiGraphics, mouseX, mouseY, delta);
+        showElementCheckBox.render(guiGraphics, mouseX, mouseY, delta);
 
-        guiGraphicsExtractor.enableScissor(
+        guiGraphics.enableScissor(
                 getX() + PADDING,
                 entryStartY,
                 getRight() - PADDING,
@@ -271,11 +292,11 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
 
             LineEntry entry = entries.get(i);
             entry.setPosition(getX() + PADDING, entryY, width - PADDING - PADDING - scrollbarWidth - PADDING);
-            entry.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
+            entry.render(guiGraphics, mouseX, mouseY, delta);
         }
 
         int totalContentHeight = entries.size() * LineEntry.HEIGHT;
-        int visibleHeight = height - PADDING - PADDING - headerHeight - editBoxHeight - PADDING * 2;
+        int visibleHeight = getBottom() - PADDING - entryStartY;
 
         if (totalContentHeight > visibleHeight) {
             int scrollbarHeight = Math.max(10, visibleHeight * visibleHeight / totalContentHeight);
@@ -284,7 +305,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
 
             int scrollbarX = getX() + width - PADDING - scrollbarWidth;
 
-            guiGraphicsExtractor.fill(
+            guiGraphics.fill(
                     scrollbarX,
                     scrollbarY,
                     scrollbarX + scrollbarWidth,
@@ -293,7 +314,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
             );
         }
 
-        guiGraphicsExtractor.disableScissor();
+        guiGraphics.disableScissor();
     }
 
     @Override
@@ -312,6 +333,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
                 focusedEntry = null;
             }
             showBackgroundCheckBox.setFocused(false);
+            showBarsCheckBox.setFocused(false);
             showElementCheckBox.setFocused(false);
             idEditBox.setFocused(true);
             scaleEditBox.setFocused(false);
@@ -324,6 +346,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
                 focusedEntry = null;
             }
             showBackgroundCheckBox.setFocused(false);
+            showBarsCheckBox.setFocused(false);
             showElementCheckBox.setFocused(false);
             scaleEditBox.setFocused(true);
             idEditBox.setFocused(false);
@@ -336,6 +359,20 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
                 focusedEntry = null;
             }
             showBackgroundCheckBox.setFocused(true);
+            showBarsCheckBox.setFocused(false);
+            showElementCheckBox.setFocused(false);
+            scaleEditBox.setFocused(false);
+            idEditBox.setFocused(false);
+            return true;
+        }
+
+        if(showBarsCheckBox.mouseClicked(mouseButtonEvent, doubled)) {
+            if (focusedEntry != null) {
+                focusedEntry.setFocused(false);
+                focusedEntry = null;
+            }
+            showBackgroundCheckBox.setFocused(false);
+            showBarsCheckBox.setFocused(true);
             showElementCheckBox.setFocused(false);
             scaleEditBox.setFocused(false);
             idEditBox.setFocused(false);
@@ -348,6 +385,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
                 focusedEntry = null;
             }
             showBackgroundCheckBox.setFocused(false);
+            showBarsCheckBox.setFocused(false);
             showElementCheckBox.setFocused(true);
             scaleEditBox.setFocused(false);
             idEditBox.setFocused(false);
@@ -362,6 +400,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
                 idEditBox.setFocused(false);
                 scaleEditBox.setFocused(false);
                 showBackgroundCheckBox.setFocused(false);
+                showBarsCheckBox.setFocused(false);
                 showElementCheckBox.setFocused(false);
                 return true;
             }
@@ -375,6 +414,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
         if (idEditBox.isFocused()) return idEditBox.keyPressed(keyEvent);
         if (scaleEditBox.isFocused()) return scaleEditBox.keyPressed(keyEvent);
         if (showBackgroundCheckBox.isFocused()) return showBackgroundCheckBox.keyPressed(keyEvent);
+        if (showBarsCheckBox.isFocused()) return showBarsCheckBox.keyPressed(keyEvent);
         if (showElementCheckBox.isFocused()) return showElementCheckBox.keyPressed(keyEvent);
         if (focusedEntry != null) return focusedEntry.keyPressed(keyEvent);
         return false;
@@ -385,6 +425,7 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
         if (idEditBox.isFocused()) return idEditBox.charTyped(characterEvent);
         if (scaleEditBox.isFocused()) return scaleEditBox.charTyped(characterEvent);
         if (showBackgroundCheckBox.isFocused()) return showBackgroundCheckBox.charTyped(characterEvent);
+        if (showBarsCheckBox.isFocused()) return showBarsCheckBox.charTyped(characterEvent);
         if (showElementCheckBox.isFocused()) return showElementCheckBox.charTyped(characterEvent);
         if (focusedEntry != null) return focusedEntry.charTyped(characterEvent);
         return false;
@@ -401,7 +442,9 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
 
         scrollOffset -= (int) (verticalAmount * 10);
 
-        int visibleHeight = height - PADDING - PADDING - headerHeight - editBoxHeight - PADDING * 2;
+        int entryStartY = getY() + headerHeight + PADDING + (editBoxHeight + PADDING) * 2;
+
+        int visibleHeight = getBottom() - PADDING - entryStartY;
         int totalContentHeight = entries.size() * LineEntry.HEIGHT;
         int maxScroll = Math.max(0, totalContentHeight - visibleHeight);
         scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll);
@@ -514,17 +557,17 @@ public class EditCustomHUDWidget extends AbstractWidget implements ScreenConstan
             );
         }
 
-        public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
-            editBoxWidget.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-            isCentreWidget.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-            isSmallWidget.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-            addButton.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
-            deleteButton.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
+        public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+            editBoxWidget.render(guiGraphics, mouseX, mouseY, delta);
+            isCentreWidget.render(guiGraphics, mouseX, mouseY, delta);
+            isSmallWidget.render(guiGraphics, mouseX, mouseY, delta);
+            addButton.render(guiGraphics, mouseX, mouseY, delta);
+            deleteButton.render(guiGraphics, mouseX, mouseY, delta);
 
-            this.renderTooltips(guiGraphicsExtractor, mouseX, mouseY, delta);
+            this.renderTooltips(guiGraphics, mouseX, mouseY, delta);
         }
 
-        private void renderTooltips(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
+        private void renderTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
             if(editBoxWidget.isFocused()
                     && editBoxWidget.isMouseOver(mouseX, mouseY)) {
                 guiGraphics.setTooltipForNextFrame(minecraftClient.font, Component.literal("You can also use placeholders. See wiki"), mouseX, mouseY);

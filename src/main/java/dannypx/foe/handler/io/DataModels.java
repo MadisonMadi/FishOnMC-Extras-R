@@ -21,6 +21,7 @@ public class DataModels {
         QUEST_DATA("quest"),
         CREW_DATA("crew"),
         CUSTOM_HUD_DATA("custom_hud"),
+        CUSTOM_HUD_ICON_DATA("custom_hud_icon"),
         CUSTOM_BUTTON_DATA("custom_button"),
         CUSTOM_NOTIFICATION_DATA("custom_notification"),
         CUSTOM_CHAT_NOTIFICATION_DATA("custom_chat_notification"),
