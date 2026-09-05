@@ -58,8 +58,8 @@ public class ChestScreenRenderHandler extends ScreenHandler {
     }
 
     @Override
-    public void render(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {
-        super.render(screen, guiGraphicsExtractor, mouseX, mouseY, tickDelta);
+    public void extractRenderState(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {
+        super.extractRenderState(screen, guiGraphicsExtractor, mouseX, mouseY, tickDelta);
 
         if(searchBarWidget != null) searchBarWidget.render(guiGraphicsExtractor, tickDelta);
     }

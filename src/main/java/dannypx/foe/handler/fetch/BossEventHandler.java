@@ -39,6 +39,7 @@ public class BossEventHandler extends Handler {
         LOCATION_COLORS.put("Amazon River", TextColor.fromRgb(0x3EA729));
         LOCATION_COLORS.put("Mediterranean Sea", TextColor.fromRgb(0xF0FB37));
         LOCATION_COLORS.put("Cape Cod", TextColor.fromRgb(0xBBF5FB));
+        LOCATION_LETTER_COLORS.put("Nile River", Arrays.asList(TextColor.fromRgb(0xE6EFCB), TextColor.fromRgb(0xE6EFCB), TextColor.fromRgb(0xE7EDCA), TextColor.fromRgb(0xE8EBCA), TextColor.fromRgb(0xE9E9C9), TextColor.fromRgb(0xE9E6C8), TextColor.fromRgb(0xEAE4C7), TextColor.fromRgb(0xEBE2C7), TextColor.fromRgb(0xECE0C6), TextColor.fromRgb(0xECE0C6)));
         LOCATION_LETTER_COLORS.put("Hawaii", Arrays.asList(TextColor.fromRgb(0xFB933B), TextColor.fromRgb(0xFCB140), TextColor.fromRgb(0xEACD4D), TextColor.fromRgb(0xB2E66C), TextColor.fromRgb(0x75F0A6), TextColor.fromRgb(0x35F4EF)));
         LOCATION_LETTER_COLORS.put("Lofoten Islands", Arrays.asList(TextColor.fromRgb(0xCDDAD7), TextColor.fromRgb(0xCCDFD2), TextColor.fromRgb(0xCCE3CC), TextColor.fromRgb(0xCBE8C7), TextColor.fromRgb(0xCBECC1), TextColor.fromRgb(0xCAF1BC), TextColor.fromRgb(0xCFF2C3), TextColor.fromRgb(0xD9F3D0), TextColor.fromRgb(0xDEF4D7), TextColor.fromRgb(0xE4F5DD), TextColor.fromRgb(0xE9F6E4), TextColor.fromRgb(0xEEF6EB), TextColor.fromRgb(0xF3F7F1), TextColor.fromRgb(0xF8F8F8)));
         LOCATION_COLORS.put("Cairns", TextColor.fromRgb(0xA1C2FB));

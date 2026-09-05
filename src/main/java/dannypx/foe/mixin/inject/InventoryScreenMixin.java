@@ -20,7 +20,7 @@ public abstract class InventoryScreenMixin {
                 && Configs.mainConfig.enableMod.get()
                 && Configs.mixinConfig.inventoryScreenMixinRenderBg.get()
         ) {
-            InventoryScreenRenderHandler.instance().render(Minecraft.getInstance().screen, guiGraphicsExtractor, mouseX, mouseY, deltaTicks);
+            InventoryScreenRenderHandler.instance().extractRenderState(Minecraft.getInstance().screen, guiGraphicsExtractor, mouseX, mouseY, deltaTicks);
         }
     }
 }

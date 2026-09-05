@@ -16,7 +16,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -65,7 +65,7 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
         if(minecraftClient.options.guiScale().get() == 0) {
             minecraftClient.options.guiScale().set(3);
             minecraftClient.options.save();
-            minecraftClient.resizeDisplay();
+            minecraftClient.resizeGui();
         }
     }
 
@@ -181,6 +181,6 @@ public class FishOnMCExtrasClient implements ClientModInitializer {
     }
 
     private void registerEntityModels() {
-        EntityModelLayerRegistry.registerModelLayer(FishingHookEntityModel.MODEL_LAYER, FishingHookEntityModel::generateModel);
+        ModelLayerRegistry.registerModelLayer(FishingHookEntityModel.MODEL_LAYER, FishingHookEntityModel::generateModel);
     }
 }

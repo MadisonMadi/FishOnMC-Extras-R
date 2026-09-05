@@ -1437,7 +1437,7 @@ public class PlaceholderRegistry {
         }
 
         static MutableComponent getItemFromItemFrameName() {
-            return HitResultHandler.instance().getItemFrameItem().getItem().getName().copy();
+            return HitResultHandler.instance().getItemFrameItem().getHoverName().copy();
         }
     }
 

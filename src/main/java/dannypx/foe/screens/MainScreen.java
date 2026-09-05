@@ -4,7 +4,7 @@ import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.config.Configs;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,17 +31,17 @@ public class MainScreen extends DefaultModScreen {
     @Override
     protected void init() {
         super.init();
-        this.renderWidgets();
+        this.extractRenderWidgets();
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        super.render(guiGraphics, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
 
         int screenWidth = this.minecraft.getWindow().getGuiScaledWidth();
         int screenHeight = this.minecraft.getWindow().getGuiScaledHeight();
 
-        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+        guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED,
                 ICON_TEXTURE,
                 screenWidth / 2 - iconSize / 2,
                 screenHeight / 2 - iconSize + (BUTTON_HEIGHT + PADDING_QUART) * -2 + PADDING,
@@ -50,48 +49,48 @@ public class MainScreen extends DefaultModScreen {
         );
 
         Component creatorHUDComponent = Component.literal("Creator: HUD Elements");
-        guiGraphics.drawString(font, creatorHUDComponent,
+        guiGraphicsExtractor.text(font, creatorHUDComponent,
                 width / 2 - font.width(creatorHUDComponent) / 2,
                 height / 2 - (BUTTON_HEIGHT + PADDING_QUART) * 2 - font.lineHeight - PADDING_QUART, CommonColors.WHITE, true
         );
 
         Component creatorTriggerComponent = Component.literal("Creator: Triggers");
-        guiGraphics.drawString(font, creatorTriggerComponent,
+        guiGraphicsExtractor.text(font, creatorTriggerComponent,
                 width / 2 - font.width(creatorTriggerComponent) / 2,
                 height / 2 + (BUTTON_HEIGHT + PADDING_QUART) * 0 - font.lineHeight - PADDING_QUART - PADDING_HALF, CommonColors.WHITE, true
         );
 
         Component creatorObserverComponent = Component.literal("Creator: Observers");
-        guiGraphics.drawString(font, creatorObserverComponent,
+        guiGraphicsExtractor.text(font, creatorObserverComponent,
                 width / 2 - font.width(creatorObserverComponent) / 2,
                 height / 2 + (BUTTON_HEIGHT + PADDING_QUART) * 3 - font.lineHeight - PADDING_QUART - (PADDING_HALF * 2), CommonColors.WHITE, true
         );
 
         Component settingsComponent = Component.literal("Settings");
-        guiGraphics.drawString(font, settingsComponent,
+        guiGraphicsExtractor.text(font, settingsComponent,
                 width / 2 - font.width(settingsComponent) / 2,
                 height / 2 + (BUTTON_HEIGHT + PADDING_QUART) * 6 - font.lineHeight - PADDING_QUART - (PADDING_HALF * 3), CommonColors.WHITE, true
         );
 
         //Versions
-        guiGraphics.drawString(font, Component.literal("Mod Version: v" + FishOnMCExtras.VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - font.lineHeight - PADDING_QUART, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("HUD Version: v" + FishOnMCExtras.HUD_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 2, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Chat Trigger Version: v" + FishOnMCExtras.CHAT_TRIGGER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 3, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Timer Version: v" + FishOnMCExtras.TIMER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 4, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Notification Version: v" + FishOnMCExtras.NOTIFICATION_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 5, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Button Version: v" + FishOnMCExtras.BUTTON_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 6, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Chat Notification Version: v" + FishOnMCExtras.CHAT_NOTIFICATION_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 7, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Event Trigger Version: v" + FishOnMCExtras.EVENT_TRIGGER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 8, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("Tracker Version: v" + FishOnMCExtras.TRACKER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 9, CommonColors.WHITE, true);
-        guiGraphics.drawString(font, Component.literal("HUD Icon Version: v" + FishOnMCExtras.HUD_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 10, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Mod Version: v" + FishOnMCExtras.VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - font.lineHeight - PADDING_QUART, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("HUD Version: v" + FishOnMCExtras.HUD_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 2, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Chat Trigger Version: v" + FishOnMCExtras.CHAT_TRIGGER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 3, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Timer Version: v" + FishOnMCExtras.TIMER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 4, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Notification Version: v" + FishOnMCExtras.NOTIFICATION_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 5, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Button Version: v" + FishOnMCExtras.BUTTON_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 6, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Chat Notification Version: v" + FishOnMCExtras.CHAT_NOTIFICATION_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 7, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Event Trigger Version: v" + FishOnMCExtras.EVENT_TRIGGER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 8, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("Tracker Version: v" + FishOnMCExtras.TRACKER_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 9, CommonColors.WHITE, true);
+        guiGraphicsExtractor.text(font, Component.literal("HUD Icon Version: v" + FishOnMCExtras.HUD_VERSION).withStyle(ChatFormatting.DARK_GRAY), PADDING_QUART, height - (font.lineHeight + PADDING_QUART) * 10, CommonColors.WHITE, true);
     }
 
-    private void renderWidgets() {
+    private void extractRenderWidgets() {
         List<AbstractWidget> widgets = new ArrayList<>();
 
         widgets.add(Button.builder(
-                Component.literal("HUD Texts"),
-                button -> this.minecraft.setScreen(new CustomHudMakerScreen(this.minecraft.screen)))
+                        Component.literal("HUD Texts"),
+                        button -> this.minecraft.setScreen(new CustomHudMakerScreen(this.minecraft.screen)))
                 .pos(width / 2 - BUTTON_WIDTH / 2,
                         height / 2 - (BUTTON_HEIGHT + PADDING_QUART) * 2)
                 .size(BUTTON_WIDTH / 2 - PADDING_HALF, BUTTON_HEIGHT)

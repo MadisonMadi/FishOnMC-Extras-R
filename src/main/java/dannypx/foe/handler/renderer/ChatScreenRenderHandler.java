@@ -32,7 +32,7 @@ public class ChatScreenRenderHandler extends ScreenHandler {
 
     //region Methods
     @Override
-    public void render(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {
+    public void extractRenderState(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {
         if(screen instanceof ChatScreen chatScreen) {
             EditBox chatBox = ((ChatScreenAccessor) chatScreen).getInput();
             if(chatBox.getValue().isBlank() && ProfileDataHandler.instance().getProfileData().isInCrewChat) {

@@ -20,10 +20,10 @@ public abstract class ScreenHandler implements ScreenConstants {
     protected final Minecraft minecraft = Minecraft.getInstance();
 
     public void init(Screen screen) {}
-    public void render(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {}
+    public void extractRenderState(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {}
     protected abstract Map<String, Pair<MutableComponent, MutableComponent>> _getFields();
 
-    public void renderButtonHelp(GuiGraphicsExtractor guiGraphicsExtractor, boolean showInspect, boolean showScroll) {
+    public void extractRenderButtonHelp(GuiGraphicsExtractor guiGraphicsExtractor, boolean showInspect, boolean showScroll) {
         Font font = minecraft.font;
         List<Component> listHelp = new ArrayList<>();
 

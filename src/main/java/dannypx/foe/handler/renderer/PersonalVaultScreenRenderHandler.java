@@ -2,7 +2,6 @@ package dannypx.foe.handler.renderer;
 
 import dannypx.foe.handler.ScreenHandler;
 import dannypx.foe.handler.logic.LoadingHandler;
-import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.logic.SearchHandler;
 import dannypx.foe.screens.widget.SearchBarWidget;
 import dannypx.foe.type.tuple.Pair;
@@ -62,8 +61,8 @@ public class PersonalVaultScreenRenderHandler extends ScreenHandler {
     }
 
     @Override
-    public void render(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {
-        super.render(screen, guiGraphicsExtractor, mouseX, mouseY, tickDelta);
+    public void extractRenderState(Screen screen, GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float tickDelta) {
+        super.extractRenderState(screen, guiGraphicsExtractor, mouseX, mouseY, tickDelta);
 
         if(searchBarWidget != null) searchBarWidget.render(guiGraphicsExtractor, tickDelta);
     }

@@ -98,13 +98,13 @@ public class NotifierHandler extends Handler {
         Component sizeComponent = fish.getFishSizeComponent();
 
         Component lengthComponent = TextHelper.concat(
-                Component.literal(TextHelper.floatToString(fish.getLength(), 2)).withStyle(ChatFormatting.GRAY),
-                Component.literal("in ").withStyle(ChatFormatting.GRAY)
+                Component.literal(TextHelper.floatToString(fish.getLength(), 2)).withStyle(ChatFormatting.WHITE),
+                Component.literal("in ").withStyle(ChatFormatting.WHITE)
         );
 
         Component weightComponent = TextHelper.concat(
-                Component.literal(TextHelper.floatToString(fish.getWeight(), 2)).withStyle(ChatFormatting.GRAY),
-                Component.literal("lb ").withStyle(ChatFormatting.GRAY)
+                Component.literal(TextHelper.floatToString(fish.getWeight(), 2)).withStyle(ChatFormatting.WHITE),
+                Component.literal("lb ").withStyle(ChatFormatting.WHITE)
         );
 
         List<Component> notificationComponentList = new ArrayList<>(Arrays.asList(

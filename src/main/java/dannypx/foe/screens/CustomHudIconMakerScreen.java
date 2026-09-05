@@ -12,7 +12,7 @@ import dannypx.foe.screens.interfaces.ScreenConstants;
 import dannypx.foe.screens.widget.ButtonListWidget;
 import dannypx.foe.type.tuple.Triplet;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -58,24 +58,24 @@ public class CustomHudIconMakerScreen extends Screen implements ScreenConstants 
     @Override
     protected void init() {
         super.init();
-        this.renderWidgets();
+        this.extractRenderWidgets();
         this.resetFields();
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        this.renderBox(guiGraphics, mouseX, mouseY, delta);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
+        this.extractRenderBox(guiGraphicsExtractor, mouseX, mouseY, delta);
 
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
 
-        this.renderComponent(guiGraphics, mouseX, mouseY, delta);
-        this.renderTooltip(guiGraphics, mouseX, mouseY, delta);
-        this.hudIconList.render(guiGraphics, mouseX, mouseY, delta);
+        this.extractRenderText(guiGraphicsExtractor, mouseX, mouseY, delta);
+        this.extractRenderTooltip(guiGraphicsExtractor, mouseX, mouseY, delta);
+        this.hudIconList.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, delta);
     }
 
-    private void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    private void extractRenderTooltip(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
         if(iconEditBox.isMouseOver(mouseX, mouseY)) {
-            guiGraphics.setComponentTooltipForNextFrame(font, List.of(
+            guiGraphicsExtractor.setComponentTooltipForNextFrame(font, List.of(
                     Component.literal("Must be of type").withStyle(ChatFormatting.GRAY),
                     Component.literal("- Number, slot index of your inventory").withStyle(ChatFormatting.GRAY),
                     Component.literal("- String, of format \"minecraft:<id>[<componentData>]\"").withStyle(ChatFormatting.GRAY),
@@ -85,15 +85,15 @@ public class CustomHudIconMakerScreen extends Screen implements ScreenConstants 
         }
     }
 
-    private void renderComponent(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        guiGraphics.drawCenteredString(font,
+    private void extractRenderText(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta) {
+        guiGraphicsExtractor.centeredText(font,
                 this.header,
                 (BUTTON_WIDTH + PADDING * 2) + (this.minecraft.getWindow().getGuiScaledWidth() - (BUTTON_WIDTH + PADDING * 2)) / 2,
                 PADDING + widgetHeight / 2 - font.lineHeight / 2,
                 CommonColors.WHITE
         );
 
-        guiGraphics.drawString(font,
+        guiGraphicsExtractor.text(font,
                 Component.literal("Scale"),
                 this.minecraft.getWindow().getGuiScaledWidth() - PADDING - sideWidth - 40 - PADDING_HALF - minecraft.font.width("Scale") - PADDING_HALF,
                 PADDING + widgetHeight / 2 - font.lineHeight / 2 + (widgetHeight + PADDING),
@@ -101,7 +101,7 @@ public class CustomHudIconMakerScreen extends Screen implements ScreenConstants 
                 true
         );
 
-        guiGraphics.drawString(font,
+        guiGraphicsExtractor.text(font,
                 Component.literal("Icon"),
                 (BUTTON_WIDTH + PADDING * 2) + PADDING,
                 PADDING + widgetHeight / 2 - font.lineHeight / 2 + (widgetHeight + PADDING) * 3,
@@ -110,18 +110,18 @@ public class CustomHudIconMakerScreen extends Screen implements ScreenConstants 
         );
     }
 
-    private void renderBox(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta)
+    private void extractRenderBox(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float delta)
     {
-        guiGraphics.fill(
+        guiGraphicsExtractor.fill(
                 (BUTTON_WIDTH + PADDING * 2), 0,
                 this.minecraft.getWindow().getGuiScaledWidth(),
                 this.minecraft.getWindow().getGuiScaledHeight() - (BUTTON_HEIGHT + PADDING_HALF) - 3,
                 0x99000000);
-        guiGraphics.hLine((BUTTON_WIDTH + PADDING * 2), this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight() - (BUTTON_HEIGHT + PADDING_HALF) - 3, CommonColors.DARK_GRAY);
-        guiGraphics.vLine((BUTTON_WIDTH + PADDING * 2), 0, this.minecraft.getWindow().getGuiScaledHeight() - (BUTTON_HEIGHT + PADDING_HALF) - 3, CommonColors.DARK_GRAY);
+        guiGraphicsExtractor.horizontalLine((BUTTON_WIDTH + PADDING * 2), this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight() - (BUTTON_HEIGHT + PADDING_HALF) - 3, CommonColors.DARK_GRAY);
+        guiGraphicsExtractor.verticalLine((BUTTON_WIDTH + PADDING * 2), 0, this.minecraft.getWindow().getGuiScaledHeight() - (BUTTON_HEIGHT + PADDING_HALF) - 3, CommonColors.DARK_GRAY);
     }
 
-    private void renderWidgets() {
+    private void extractRenderWidgets() {
         List<AbstractWidget> widgets = new ArrayList<>();
 
         widgets.add(this.saveBackButton());
@@ -505,80 +505,80 @@ public class CustomHudIconMakerScreen extends Screen implements ScreenConstants 
 
     private Button saveBackButton() {
         return Button.builder(Component.literal("Save and Return"), button -> {
-            if(selectedHudIconId != null) {
-                if(idEditBox.getValue().isBlank()) {
-                    SystemToast.add(this.minecraft.getToastManager(),
-                            SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-                            Component.literal("Fish On Extras Rebirth"),
-                            Component.literal("HUD Icon name is empty"));
+                    if(selectedHudIconId != null) {
+                        if(idEditBox.getValue().isBlank()) {
+                            SystemToast.add(this.minecraft.getToastManager(),
+                                    SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
+                                    Component.literal("Fish On Extras Rebirth"),
+                                    Component.literal("HUD Icon name is empty"));
 
-                    return;
-                }
+                            return;
+                        }
 
-                float scale;
-                try {
-                    scale = Float.parseFloat(scaleEditBox.getValue());
-                } catch (NumberFormatException ignored) {
-                    SystemToast.add(this.minecraft.getToastManager(),
-                            SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-                            Component.literal("Fish On Extras Rebirth"),
-                            Component.literal("Could not parse scale"));
+                        float scale;
+                        try {
+                            scale = Float.parseFloat(scaleEditBox.getValue());
+                        } catch (NumberFormatException ignored) {
+                            SystemToast.add(this.minecraft.getToastManager(),
+                                    SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
+                                    Component.literal("Fish On Extras Rebirth"),
+                                    Component.literal("Could not parse scale"));
 
-                    return;
-                }
+                            return;
+                        }
 
-                if(iconEditBox.getValue().isBlank()) {
-                    SystemToast.add(this.minecraft.getToastManager(),
-                            SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-                            Component.literal("Fish On Extras Rebirth"),
-                            Component.literal("Icon is empty"));
-                }
+                        if(iconEditBox.getValue().isBlank()) {
+                            SystemToast.add(this.minecraft.getToastManager(),
+                                    SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
+                                    Component.literal("Fish On Extras Rebirth"),
+                                    Component.literal("Icon is empty"));
+                        }
 
-                boolean couldParseIcon = false;
-                CustomHudIconDataHandler.IconType iconType = null;
+                        boolean couldParseIcon = false;
+                        CustomHudIconDataHandler.IconType iconType = null;
 
-                if(useTrackerNameCheckBox.selected()) {
-                    couldParseIcon = true;
-                    iconType = CustomHudIconDataHandler.IconType.TRACKER;
-                } else {
-                    try {
-                        Integer.parseInt(iconEditBox.getValue());
-                        couldParseIcon = true;
-                        iconType = CustomHudIconDataHandler.IconType.SLOT;
-                    } catch (NumberFormatException ignored) {}
+                        if(useTrackerNameCheckBox.selected()) {
+                            couldParseIcon = true;
+                            iconType = CustomHudIconDataHandler.IconType.TRACKER;
+                        } else {
+                            try {
+                                Integer.parseInt(iconEditBox.getValue());
+                                couldParseIcon = true;
+                                iconType = CustomHudIconDataHandler.IconType.SLOT;
+                            } catch (NumberFormatException ignored) {}
 
-                    Pattern iconPattern = Pattern.compile("^(?:([a-z_]+:[a-z_]+)(?:\\[(.*)\\])?|(.))$");
-                    if(iconPattern.matcher(iconEditBox.getValue()).matches() && !couldParseIcon) {
-                        couldParseIcon = true;
-                        iconType = CustomHudIconDataHandler.IconType.ITEM;
+                            Pattern iconPattern = Pattern.compile("^(?:([a-z_]+:[a-z_]+)(?:\\[(.*)\\])?|(.))$");
+                            if(iconPattern.matcher(iconEditBox.getValue()).matches() && !couldParseIcon) {
+                                couldParseIcon = true;
+                                iconType = CustomHudIconDataHandler.IconType.ITEM;
+                            }
+
+                            if(iconEditBox.getValue().startsWith("%") && iconEditBox.getValue().endsWith("%") && !couldParseIcon) {
+                                couldParseIcon = true;
+                                iconType = CustomHudIconDataHandler.IconType.PLACEHOLDER;
+                            }
+                        }
+
+                        if(!couldParseIcon) {
+                            SystemToast.add(this.minecraft.getToastManager(),
+                                    SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
+                                    Component.literal("Fish On Extras Rebirth"),
+                                    Component.literal("Could not parse icon"));
+                            return;
+                        }
+
+                        CustomHudIconDataHandler.instance().updateHudIcon(
+                                selectedHudIconId,
+                                idEditBox.getValue(),
+                                scale,
+                                showBackgroundCheckBox.selected(),
+                                showBarsCheckBox.selected(),
+                                showElementCheckBox.selected(),
+                                useTrackerNameCheckBox.selected(),
+                                iconEditBox.getValue(),
+                                iconType
+                        );
                     }
-
-                    if(iconEditBox.getValue().startsWith("%") && iconEditBox.getValue().endsWith("%") && !couldParseIcon) {
-                        couldParseIcon = true;
-                        iconType = CustomHudIconDataHandler.IconType.PLACEHOLDER;
-                    }
-                }
-
-                if(!couldParseIcon) {
-                    SystemToast.add(this.minecraft.getToastManager(),
-                            SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-                            Component.literal("Fish On Extras Rebirth"),
-                            Component.literal("Could not parse icon"));
-                    return;
-                }
-
-                CustomHudIconDataHandler.instance().updateHudIcon(
-                        selectedHudIconId,
-                        idEditBox.getValue(),
-                        scale,
-                        showBackgroundCheckBox.selected(),
-                        showBarsCheckBox.selected(),
-                        showElementCheckBox.selected(),
-                        useTrackerNameCheckBox.selected(),
-                        iconEditBox.getValue(),
-                        iconType
-                );
-            }
                     this.onClose();
                 })
                 .pos(width - PADDING_HALF - BUTTON_WIDTH / 2, height - PADDING_HALF - BUTTON_HEIGHT)
@@ -588,7 +588,7 @@ public class CustomHudIconMakerScreen extends Screen implements ScreenConstants 
 
     private Button backButton() {
         return Button.builder(Component.literal("Return"), button ->
-                    this.onClose())
+                        this.onClose())
                 .pos(width - (PADDING_HALF + BUTTON_WIDTH / 2) * 2, height - PADDING_HALF - BUTTON_HEIGHT)
                 .size(BUTTON_WIDTH / 2, BUTTON_HEIGHT)
                 .build();

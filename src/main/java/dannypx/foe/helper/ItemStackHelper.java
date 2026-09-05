@@ -10,6 +10,7 @@ import java.util.function.UnaryOperator;
 
 import dannypx.foe.handler.logic.LoggerHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -64,7 +65,7 @@ public class ItemStackHelper {
             try {
                 ItemParser itemParser = new ItemParser(lookup);
                 StringReader stringReader = new StringReader(value);
-                ItemParser.ItemResult result = itemParser.parse(stringReader);
+                ItemInput result = itemParser.parse(stringReader);
 
                 ItemStack itemStack = new ItemStack(result.item(), 1);
                 itemStack.applyComponents(result.components());
