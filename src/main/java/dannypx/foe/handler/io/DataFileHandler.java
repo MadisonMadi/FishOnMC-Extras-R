@@ -8,9 +8,11 @@ import dannypx.foe.handler.logic.LoadingHandler;
 import dannypx.foe.handler.logic.LoggerHandler;
 import dannypx.foe.handler.logic.UpdateHandler;
 import dannypx.foe.handler.store.*;
+import dannypx.foe.placeholder.registry.PlaceholderRegistry;
 import dannypx.foe.type.custom_value.TrackerValue;
 import dannypx.foe.type.tuple.Pair;
 import dannypx.foe.type.type_adapter.*;
+import dannypx.foe.type.version.Version;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -69,7 +71,7 @@ public class DataFileHandler extends Handler {
     private boolean loadDataToMemory(DataModels.DataModelType dataModelType) {
         DataModels.DataModel data = this.getData(dataModelType);
         try {
-            Path configDir = getConfigDir(data.uuid);
+            Path configDir = getUserConfigDir(data.uuid);
             Files.createDirectories(configDir);
             Path filePath = configDir.resolve(dataModelType.FILENAME + ".json");
             if(!checkIfFileExist(filePath)) {
@@ -91,7 +93,7 @@ public class DataFileHandler extends Handler {
     public boolean saveToFile(DataModels.DataModelType dataModelType) {
         DataModels.DataModel data = this.getData(dataModelType);
         try {
-            Path configDir = getConfigDir(data.uuid);
+            Path configDir = getUserConfigDir(data.uuid);
             Files.createDirectories(configDir);
             Path filePath = configDir.resolve(dataModelType.FILENAME + ".json");
             String resultJson = dataModelToJson(data);
@@ -105,13 +107,39 @@ public class DataFileHandler extends Handler {
         return true;
     }
 
-    private Path getConfigDir(UUID uuid) {
+    public boolean saveSchemaToFile() {
+        try {
+            Path exportDir = getExportDevConfigDir();
+            Files.createDirectories(exportDir);
+            Path listPath = exportDir.resolve("placeholder-list-" + Version.of(FishOnMCExtras.VERSION).get() +  ".json");
+            Path schemaPath = exportDir.resolve("placeholder-schema-" + Version.of(FishOnMCExtras.VERSION).get() +  ".json");
+            Files.writeString(listPath, PlaceholderRegistry.toJsonPathListString());
+            Files.writeString(schemaPath, PlaceholderRegistry.toJsonSchemaString());
+
+            LoggerHandler._debug("Exported placeholder schema and list");
+        } catch (IOException e) {
+            LoggerHandler.error(e);
+            LoadingHandler.instance().setError(true);
+        }
+        return true;
+    }
+
+    private Path getUserConfigDir(UUID uuid) {
+        return getConfigDir()
+                .resolve(DATA_FOLDER)
+                .resolve(uuid.toString());
+    }
+
+    private Path getExportDevConfigDir() {
+        return getConfigDir()
+                .resolve("export");
+    }
+
+    private Path getConfigDir() {
         return FabricLoader
                 .getInstance()
                 .getConfigDir()
-                .resolve(FishOnMCExtras.MOD_ID)
-                .resolve(DATA_FOLDER)
-                .resolve(uuid.toString());
+                .resolve(FishOnMCExtras.MOD_ID);
     }
 
     private boolean checkIfFileExist(Path filePath) {

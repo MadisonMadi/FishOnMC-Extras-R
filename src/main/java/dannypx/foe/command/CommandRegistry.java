@@ -9,14 +9,13 @@ import dannypx.foe.FishOnMCExtras;
 import dannypx.foe.config.Configs;
 import dannypx.foe.handler.fetch.ChatHandler;
 import dannypx.foe.handler.fetch.StatsScreenHandler;
-import dannypx.foe.handler.logic.LoggerHandler;
+import dannypx.foe.handler.io.DataFileHandler;
 import dannypx.foe.handler.logic.NotifierHandler;
 import dannypx.foe.handler.logic.TimerHandler;
 import dannypx.foe.handler.logic.UpdateHandler;
 import dannypx.foe.handler.store.*;
 import dannypx.foe.helper.ItemStackHelper;
 import dannypx.foe.helper.TextHelper;
-import dannypx.foe.placeholder.registry.PlaceholderRegistry;
 import dannypx.foe.screens.MainScreen;
 import dannypx.foe.type.custom_value.*;
 import dannypx.foe.type.tracker.TrackerAction;
@@ -45,8 +44,7 @@ public class CommandRegistry {
                 command("foe")
                         .then(command("config").executes(Command.Foe::openConfig))
                         .then(command("main").executes(Command.Foe::openMainScreen))
-                        .then(command("export_placeholder_schema").executes(Command.Foe::exportPlaceholderSchema))
-                        .then(command("export_placeholder_list").executes(Command.Foe::exportPlaceholderList))
+                        .then(command("export_placeholder_data").executes(Command.Foe::exportPlaceholderData))
                         .then(command("update")
                                 .then(command("0.3.8").then(command("confirm").executes(Command.Update::confirmV038)))
                         )
@@ -202,12 +200,8 @@ public class CommandRegistry {
                 return executeCommand(() -> Minecraft.getInstance().setScreen(new MainScreen(Minecraft.getInstance().screen)));
             }
 
-            public static int exportPlaceholderSchema(CommandContext<FabricClientCommandSource> context) {
-                return executeCommand(context, Component.literal("Exported placeholder schema to logs").withStyle(ChatFormatting.GREEN), () -> LoggerHandler.info(PlaceholderRegistry.toJsonSchemaString()));
-            }
-
-            public static int exportPlaceholderList(CommandContext<FabricClientCommandSource> context) {
-                return executeCommand(context, Component.literal("Exported placeholder list to logs").withStyle(ChatFormatting.GREEN), () -> LoggerHandler.info(PlaceholderRegistry.toJsonPathListString()));
+            public static int exportPlaceholderData(CommandContext<FabricClientCommandSource> context) {
+                return executeCommand(context, Component.literal("Exported placeholder schema and list to file").withStyle(ChatFormatting.GREEN), () -> DataFileHandler.instance().saveSchemaToFile());
             }
         }
 

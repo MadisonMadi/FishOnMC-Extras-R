@@ -539,17 +539,77 @@ public class TextHelper {
     }
 
     public static MutableComponent replace(Component component, String target, String replacement) {
-        MutableComponent result = Component.empty();
+        if (target.isEmpty()) {
+            return component.copy();
+        }
 
-        component.visit((style, string) -> {
-            result.append(Component.literal(string.replace(target, replacement)).setStyle(style));
-            return Optional.empty();
-        }, Style.EMPTY);
+        String flat = component.getString();
+        List<Integer> matchStarts = new ArrayList<>();
+        int searchFrom = 0;
+        int found;
+        while ((found = flat.indexOf(target, searchFrom)) != -1) {
+            matchStarts.add(found);
+            searchFrom = found + target.length();
+        }
+
+        if (matchStarts.isEmpty()) {
+            return component.copy();
+        }
+
+        MutableComponent result = Component.empty();
+        int cursor = 0;
+        for (int matchStart : matchStarts) {
+            int matchEnd = matchStart + target.length();
+
+            result.append(substring(component, cursor, matchStart));
+
+            Style replacementStyle = matchStart > 0 ? styleAt(component, matchStart - 1) : Style.EMPTY;
+            result.append(Component.literal(replacement).setStyle(replacementStyle));
+
+            cursor = matchEnd;
+        }
+        result.append(substring(component, cursor, flat.length()));
 
         return result;
     }
 
-    public static Component trim(Component component) {
+    public static MutableComponent replaceFirst(Component component, String target, String replacement) {
+        if (target.isEmpty()) {
+            return component.copy();
+        }
+
+        String flat = component.getString();
+        int matchStart = flat.indexOf(target);
+        if (matchStart == -1) {
+            return component.copy();
+        }
+        int matchEnd = matchStart + target.length();
+
+        MutableComponent before = substring(component, 0, matchStart);
+        MutableComponent after = substring(component, matchEnd, flat.length());
+        Style replacementStyle = matchStart > 0 ? styleAt(component, matchStart - 1) : Style.EMPTY;
+
+        return before.append(Component.literal(replacement).setStyle(replacementStyle)).append(after);
+    }
+
+    private static Style styleAt(Component component, int index) {
+        AtomicInteger cursor = new AtomicInteger(0);
+        AtomicReference<Style> found = new AtomicReference<>(Style.EMPTY);
+
+        component.visit((style, string) -> {
+            int stringStart = cursor.get();
+            int stringEnd = stringStart + string.length();
+            if (index >= stringStart && index < stringEnd) {
+                found.set(style);
+            }
+            cursor.addAndGet(string.length());
+            return Optional.empty();
+        }, Style.EMPTY);
+
+        return found.get();
+    }
+
+    public static MutableComponent trim(Component component) {
         String full = component.getString();
         int length = full.length();
 
@@ -568,6 +628,34 @@ public class TextHelper {
         }
 
         return substring(component, start, end);
+    }
+
+    public static MutableComponent capitalize(Component component) {
+        MutableComponent result = Component.empty();
+        final boolean[] visited = {false};
+
+        component.visit((style, string) -> {
+            if(!visited[0]) {
+                result.append(Component.literal(StringUtils.capitalize(string)).setStyle(style));
+                visited[0] = true;
+            } else {
+                result.append(Component.literal(string).setStyle(style));
+            }
+            return Optional.empty();
+        }, Style.EMPTY);
+
+        return result;
+    }
+
+    public static MutableComponent reverse(Component component) {
+        AtomicReference<MutableComponent> result = new AtomicReference<>(Component.empty());
+
+        component.visit((style, string) -> {
+            result.set(Component.literal(new StringBuilder(string).reverse().toString()).setStyle(style).append(result.get()));
+            return Optional.empty();
+        }, Style.EMPTY);
+
+        return result.get();
     }
 
     public static byte[] compress(final String str) throws IOException {

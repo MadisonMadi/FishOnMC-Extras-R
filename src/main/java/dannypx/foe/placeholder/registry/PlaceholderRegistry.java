@@ -820,175 +820,293 @@ public class PlaceholderRegistry {
         //region Boolean Functions
         register(node("condition").evalBoolean(EvaluationContext::evalCondition)
                 .description("Returns a boolean from the specified valid condition using the following operators; <, <=, >, >=, ==, !=.")
-                .param("condition", "boolean")
+                .param("condition", DocTypeKind.BOOLEAN)
+        );
+        register(node("equals_ignore_case").evalBoolean(EvaluationContext::evalEqualsIgnoreCase)
+                .description("Returns true if the two specified values are equal ignoring case")
+                .param("a", DocTypeKind.VALUE)
+                .param("b", DocTypeKind.VALUE)
         );
         register(node("if").evalValue(EvaluationContext::evalConditionIf)
                 .description("Returns the true value or false value based on the specified valid condition using the following operators; <, <=, >, >=, ==, !=.")
-                .param("condition", "boolean")
-                .param("true", "dynamic")
-                .paramOptional("false", "dynamic")
+                .param("condition", DocTypeKind.BOOLEAN)
+                .param("true", DocTypeKind.VALUE)
+                .paramOptional("false", DocTypeKind.VALUE)
         );
         register(node("is_blank").evalBoolean(EvaluationContext::evalIsBlank)
                 .description("Returns true if the value is empty or contains only white space codepoints, otherwise false.")
-                .param("value", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         register(node("contains").evalBoolean(EvaluationContext::evalContains)
                 .description("Returns true if and only if this value contains the specified search parameter.")
-                .param("value", "string|component")
-                .param("search", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("search", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramOptional("ignore_case", DocTypeKind.BOOLEAN)
         );
         register(node("ends_with").evalBoolean(EvaluationContext::evalEndsWith)
                 .description("Returns true if this value ends with the specified suffix.")
-                .param("value", "string|component")
-                .param("suffix", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("suffix", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramOptional("ignore_case", DocTypeKind.BOOLEAN)
         );
         register(node("starts_with").evalBoolean(EvaluationContext::evalStartsWith)
                 .description("Returns true if this value starts with the specified prefix.")
-                .param("value", "string|component")
-                .param("prefix", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("prefix", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramOptional("ignore_case", DocTypeKind.BOOLEAN)
         );
         register(node("is_infinite").evalBoolean(EvaluationContext::evalIsInfinite)
                 .description("Returns true if the specified number is infinitely large in magnitude.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("is_nan").evalBoolean(EvaluationContext::evalIsNaN)
                 .description("Returns true if the specified number is a Not-a-Number (NaN) value.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
+        );
+        register(node("is_number").evalBoolean(EvaluationContext::evalIsNumber)
+                .description("Returns true if the specified value is a number.")
+                .param("value", DocTypeKind.VALUE)
+        );
+        register(node("is_string").evalBoolean(EvaluationContext::evalIsString)
+                .description("Returns true if the specified value is a string.")
+                .param("value", DocTypeKind.VALUE)
+        );
+        register(node("is_component").evalBoolean(EvaluationContext::evalIsComponent)
+                .description("Returns true if the specified value is a component.")
+                .param("value", DocTypeKind.VALUE)
+        );
+        register(node("is_boolean").evalBoolean(EvaluationContext::evalIsBoolean)
+                .description("Returns true if the specified value is a boolean.")
+                .param("value", DocTypeKind.VALUE)
+        );
+        register(node("between").evalBoolean(EvaluationContext::evalBetween)
+                .description("Returns whether the specified value is betwen min and max (inclusive).")
+                .param("value", DocTypeKind.NUMBER)
+                .param("min", DocTypeKind.NUMBER)
+                .param("max", DocTypeKind.NUMBER)
+        );
+        register(node("one_of").evalBoolean(EvaluationContext::evalOneOf)
+                .description("Returns whether the specified values matches any of the candidates.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramVariadic("candidate", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         register(node("or").evalBoolean(EvaluationContext::evalOr)
                 .description("Returns true if at least one value is true.")
-                .paramVariadic("value", "boolean")
+                .paramVariadic("value", DocTypeKind.BOOLEAN)
         );
         register(node("and").evalBoolean(EvaluationContext::evalAnd)
                 .description("Returns true if all values is true.")
-                .paramVariadic("value", "boolean")
+                .paramVariadic("value", DocTypeKind.BOOLEAN)
         );
         register(node("not").evalBoolean(EvaluationContext::evalNot)
                 .description("Returns the reverse boolean value.")
-                .paramVariadic("value", "boolean")
+                .paramVariadic("value", DocTypeKind.BOOLEAN)
         );
         register(node("xor").evalBoolean(EvaluationContext::evalXor)
                 .description("Returns true if at least one but not all is true. If more than 3 values, returns true if an odd number of values are true.")
-                .paramVariadic("value", "boolean")
+                .paramVariadic("value", DocTypeKind.BOOLEAN)
         );
         //endregion
 
         //region String Manipulation Functions
         register(node("substring").evalValue(EvaluationContext::evalSubstring)
                 .description("Returns a value that is a substring of this value. The substring begins with the character at the specified start index and extends to the end of this string, or extends to the specified end index.")
-                .param("value", "string|component")
-                .param("start", "number")
-                .paramOptional("end", "number")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("start", DocTypeKind.NUMBER)
+                .paramOptional("end", DocTypeKind.BOOLEAN)
         );
         register(node("index_of").evalNumber(EvaluationContext::evalIndexOf)
                 .description("Returns the index within this value of the first occurrence of the specified search value, or starting at the specified from_index index.")
-                .param("value", "string|component")
-                .param("search", "string|component")
-                .paramOptional("from_index", "number")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("search", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramOptional("from_index", DocTypeKind.NUMBER)
         );
         register(node("last_index_of").evalNumber(EvaluationContext::evalLastIndexOf)
                 .description("Returns the index within this string of the last occurrence of the specified search value, or searching backward starting at the specified from_index index.")
-                .param("value", "string|component")
-                .param("search", "string|component")
-                .paramOptional("from_index", "number")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("search", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramOptional("from_index", DocTypeKind.NUMBER)
+        );
+        register(node("char_at").evalString(EvaluationContext::evalCharAt)
+                .description("Returns the character at the specified index.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("index", DocTypeKind.NUMBER)
         );
         register(node("repeat").evalValue(EvaluationContext::evalRepeat)
                 .description("Returns a value whose value is the concatenation of this value repeated count times.")
-                .param("value", "string|component")
-                .param("count", "number")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("count", DocTypeKind.NUMBER)
         );
         register(node("uppercase").evalValue(EvaluationContext::evalUppercase)
                 .description("Converts all of the characters in this value to upper case.")
-                .param("value", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         register(node("lowercase").evalValue(EvaluationContext::evalLowercase)
                 .description("Converts all of the characters in this value to lower case.")
-                .param("value", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         register(node("replace").evalValue(EvaluationContext::evalReplace)
                 .description("Replaces each target substring inside the value string with the specified replacement string. The replacement proceeds from the beginning of the string to the end.")
-                .param("value", "string|component")
-                .param("target", "string")
-                .param("replacement", "string")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("target", DocTypeKind.STRING)
+                .param("replacement", DocTypeKind.STRING)
+        );
+        register(node("replace_first").evalValue(EvaluationContext::evalReplaceFirst)
+                .description("Replaces the first occurrence of the target substring inside the value string with the specified replacement string.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("target", DocTypeKind.STRING)
+                .param("replacement", DocTypeKind.STRING)
+        );
+        register(node("reverse").evalValue(EvaluationContext::evalReverse)
+                .description("Returns the specified value in reverse character order.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+        );
+        register(node("join").evalComponent(EvaluationContext::evalJoin)
+                .description("Returns the text composed of the values joined together with the specified delimiter.")
+                .param("delimiter", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramVariadic("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+        );
+        register(node("count").evalNumber(EvaluationContext::evalCount)
+                .description("Returns the count of specified search text in specified value")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("search", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         register(node("length").evalNumber(EvaluationContext::evalLength)
                 .description("Returns the length of the specified value")
-                .param("value", "string|component")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         register(node("shorten_number").evalString(EvaluationContext::evalShortenNumber)
                 .description("Returns the value to numeric abbreviations like 1K (1.000), 1M (1.000.000), 1B (1.000.000.000), with up to 2 decimals.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("remove_format").evalString(EvaluationContext::evalRemoveFormat)
                 .description("Returns the plain text of the specified value.")
-                .param("value", "component")
+                .param("value", DocTypeKind.COMPONENT)
         );
         register(node("format_time").evalString(EvaluationContext::evalFormatTime)
                 .description("Returns the number with a leading zero if and only if the specified value is one digit.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("format_fancy_boolean").evalComponent(EvaluationContext::evalFormatFancyBoolean)
-                .param("value", "boolean")
                 .description("Returns a prettier version of a boolean. (It is formatted and thus is not a valid boolean as value)")
+                .param("value", DocTypeKind.BOOLEAN)
+        );
+        register(node("trim").evalValue(EvaluationContext::evalTrim)
+                .description("Returns a text whose value is this text, with all leading and trailing space removed.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+        );
+        register(node("pad_start").evalValue(EvaluationContext::evalPadStart)
+                .description("Returns the value padded with the specified character at the start until it reaches the specified length.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("length", DocTypeKind.NUMBER)
+                .param("character", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+        );
+        register(node("pad_end").evalValue(EvaluationContext::evalPadEnd)
+                .description("Returns the value padded with the specified character at the end until it reaches the specified length.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .param("length", DocTypeKind.NUMBER)
+                .param("character", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+        );
+        register(node("truncate").evalValue(EvaluationContext::evalTruncate)
+                .description("Returns the value shortened to the specified length, appending the suffix if available.")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+                .paramOptional("suffix", DocTypeKind.STRING, DocTypeKind.COMPONENT)
+        );
+        register(node("capitalize").evalValue(EvaluationContext::evalCapitalize)
+                .description("Capitalizes a text changing the first character to upper case")
+                .param("value", DocTypeKind.STRING, DocTypeKind.COMPONENT)
         );
         //endregion
 
         //region Math Functions
         register(node("expression").evalNumber(EvaluationContext::evalExpression)
                 .description("Returns a number from the specified valid expression using the following operators; +, -, *, /.")
-                .param("expression", "number")
+                .param("expression", DocTypeKind.NUMBER)
         );
         register(node("max").evalNumber(EvaluationContext::evalMax)
                 .description("Returns the greatest number of all values.")
-                .paramVariadic("value", "number")
+                .paramVariadic("value", DocTypeKind.NUMBER)
         );
         register(node("min").evalNumber(EvaluationContext::evalMin)
                 .description("Returns the smallest number of all values.")
-                .paramVariadic("value", "number")
+                .paramVariadic("value", DocTypeKind.NUMBER)
+        );
+        register(node("sum").evalNumber(EvaluationContext::evalSum)
+                .description("Returns the sum of all values.")
+                .paramVariadic("value", DocTypeKind.NUMBER)
+        );
+        register(node("avg").evalNumber(EvaluationContext::evalAverage)
+                .description("Returns the average of all values.")
+                .paramVariadic("value", DocTypeKind.NUMBER)
         );
         register(node("abs").evalNumber(EvaluationContext::evalAbs)
                 .description("Returns the absolute value of the specified value.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("ceil").evalNumber(EvaluationContext::evalCeil)
                 .description("Returns the nearest specified value rounded up to a mathematical integer.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("floor").evalNumber(EvaluationContext::evalFloor)
                 .description("Returns the nearest specified value rounded down to a mathematical integer.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("round").evalNumber(EvaluationContext::evalRound)
                 .description("Returns the nearest specified value rounded to the nearest mathematical integer.")
-                .param("value", "number")
-                .paramOptional("decimals", "number")
+                .param("value", DocTypeKind.NUMBER)
+                .paramOptional("decimals", DocTypeKind.NUMBER)
         );
         register(node("mod").evalNumber(EvaluationContext::evalMod)
                 .description("Returns the modulus of a mod b.")
-                .param("a", "number")
-                .param("b", "number")
+                .param("a", DocTypeKind.NUMBER)
+                .param("b", DocTypeKind.NUMBER)
         );
         register(node("clamp").evalNumber(EvaluationContext::evalClamp)
                 .description("Clamps the value to fit between min and max.")
-                .param("value", "number")
-                .param("min", "number")
-                .param("max", "number")
+                .param("value", DocTypeKind.NUMBER)
+                .param("min", DocTypeKind.NUMBER)
+                .param("max", DocTypeKind.NUMBER)
         );
         register(node("log").evalNumber(EvaluationContext::evalLog)
                 .description("Returns the natural logarithm of the specified value.")
-                .param("value", "number")
+                .param("value", DocTypeKind.NUMBER)
         );
         register(node("pow").evalNumber(EvaluationContext::evalPow)
                 .description("Returns the value of a raised to the power of b.")
-                .param("a", "number")
-                .param("b", "number")
+                .param("a", DocTypeKind.NUMBER)
+                .param("b", DocTypeKind.NUMBER)
+        );
+        register(node("sqrt").evalNumber(EvaluationContext::evalSqrt)
+                .description("Returns the positive square root of the specified value.")
+                .param("value", DocTypeKind.NUMBER)
+        );
+        register(node("distance").evalNumber(EvaluationContext::evalDistance)
+                .description("Returns the distance between two points.")
+                .param("x1", DocTypeKind.NUMBER)
+                .param("y1", DocTypeKind.NUMBER)
+                .param("z1", DocTypeKind.NUMBER)
+                .param("x2", DocTypeKind.NUMBER)
+                .param("y2", DocTypeKind.NUMBER)
+                .param("z2", DocTypeKind.NUMBER)
+        );
+        register(node("random").evalNumber(EvaluationContext::evalRandom)
+                .description("Returns a random number between 0.0 (inclusive) and 1.0 (exclusive).")
+        );
+        register(node("random_range").evalNumber(EvaluationContext::evalRandomRange)
+                .description("Returns a random number between min (inclusive) and max (exclusive).")
+                .param("min", DocTypeKind.NUMBER)
+                .param("max", DocTypeKind.NUMBER)
         );
         //endregion
 
         //region Misc
+        register(node("type_of").evalString(EvaluationContext::evalTypeOf)
+                .description("Returns the type of the specified value.")
+                .param("value", DocTypeKind.VALUE)
+        );
         register(node("hide_line").evalValue(EvaluationContext::evalHideLine).allowEmpty()
                 .description("Hides the full line if and only if the specified should_hide value is true.")
-                .param("should_hide", "boolean")
+                .param("should_hide", DocTypeKind.BOOLEAN)
         );
         //endregion
     }
@@ -2180,16 +2298,26 @@ public class PlaceholderRegistry {
         static Boolean evalCondition(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             };
             return args.getFirst().toBoolean();
         }
 
+        static Boolean evalEqualsIgnoreCase(List<PlaceholderValue> args) {
+            if(args.size() != 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects 2 arguments, got " + args.size()
+                );
+            }
+
+            return args.getFirst().toString().equalsIgnoreCase(args.get(1).toString());
+        }
+
         static PlaceholderValue evalConditionIf(List<PlaceholderValue> args) {
             if(args.size() < 2) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 2 arguments, got " + 0
+                        "expects at least 2 arguments, got " + args.size()
                 );
             };
             return args.getFirst().toBoolean()
@@ -2200,7 +2328,7 @@ public class PlaceholderRegistry {
         static Boolean evalOr(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             };
             for (PlaceholderValue arg : args) {
@@ -2212,7 +2340,7 @@ public class PlaceholderRegistry {
         static Boolean evalAnd(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             };
             for (PlaceholderValue arg : args) {
@@ -2224,7 +2352,7 @@ public class PlaceholderRegistry {
         static Boolean evalXor(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             };
             boolean result = false;
@@ -2254,30 +2382,42 @@ public class PlaceholderRegistry {
         }
 
         static Boolean evalContains(List<PlaceholderValue> args) {
-            if(args.size() != 2) {
+            if(args.size() < 2) {
                 throw new PlaceholderEvaluationException(
-                        "expects 2 arguments, got " + args.size()
+                        "expects at least 2 arguments, got " + args.size()
                 );
             };
-            return args.getFirst().toString().contains(args.get(1).toString());
+            if(args.size() > 2 && args.get(2).toBoolean()) {
+                return args.getFirst().toString().toLowerCase(Locale.US).contains(args.get(1).toString().toLowerCase(Locale.US));
+            } else {
+                return args.getFirst().toString().contains(args.get(1).toString());
+            }
         }
 
         static Boolean evalEndsWith(List<PlaceholderValue> args) {
-            if(args.size() != 2) {
+            if(args.size() < 2) {
                 throw new PlaceholderEvaluationException(
-                        "expects 2 arguments, got " + args.size()
+                        "expects at least 2 arguments, got " + args.size()
                 );
             };
-            return args.getFirst().toString().endsWith(args.get(1).toString());
+            if(args.size() > 2 && args.get(2).toBoolean()) {
+                return args.getFirst().toString().toLowerCase(Locale.US).endsWith(args.get(1).toString().toLowerCase(Locale.US));
+            } else {
+                return args.getFirst().toString().endsWith(args.get(1).toString());
+            }
         }
 
         static Boolean evalStartsWith(List<PlaceholderValue> args) {
-            if(args.size() != 2) {
+            if(args.size() < 2) {
                 throw new PlaceholderEvaluationException(
-                        "expects 2 arguments, got " + args.size()
+                        "expects at least 2 arguments, got " + args.size()
                 );
             };
-            return args.getFirst().toString().startsWith(args.get(1).toString());
+            if(args.size() > 2 && args.get(2).toBoolean()) {
+                return args.getFirst().toString().toLowerCase(Locale.US).startsWith(args.get(1).toString().toLowerCase(Locale.US));
+            } else {
+                return args.getFirst().toString().startsWith(args.get(1).toString());
+            }
         }
 
         static Boolean evalIsInfinite(List<PlaceholderValue> args) {
@@ -2298,6 +2438,68 @@ public class PlaceholderRegistry {
             return Double.isNaN(args.getFirst().toDouble());
         }
 
+        static Boolean evalIsNumber(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            }
+            return args.getFirst().isNumber();
+        }
+
+        static Boolean evalIsString(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            }
+            return args.getFirst().isString();
+        }
+
+        static Boolean evalIsComponent(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            }
+            return args.getFirst().isComponent();
+        }
+
+        static Boolean evalIsBoolean(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            }
+            return args.getFirst().isBoolean();
+        }
+
+        static Boolean evalBetween(List<PlaceholderValue> args) {
+            if(args.size() != 3) {
+                throw new PlaceholderEvaluationException(
+                        "expects 3 arguments, got " + args.size()
+                );
+            }
+            return args.getFirst().toDouble() >= args.get(1).toDouble() && args.getFirst().toDouble() <= args.get(2).toDouble();
+        }
+
+        static Boolean evalOneOf(List<PlaceholderValue> args) {
+            if(args.size() < 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects at least 2 arguments, got " + args.size()
+                );
+            }
+
+            String value = args.getFirst().toString();
+            boolean oneOf = false;
+
+            for (PlaceholderValue arg : args.subList(1, args.size())) {
+                if(value.equals(arg.toString())) oneOf = true;
+            }
+
+            return oneOf;
+        }
+
         /// Math
 
         static Number evalExpression(List<PlaceholderValue> args) {
@@ -2307,7 +2509,7 @@ public class PlaceholderRegistry {
         static Number evalMax(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             };
             double result = Double.NEGATIVE_INFINITY;
@@ -2320,7 +2522,7 @@ public class PlaceholderRegistry {
         static Number evalMin(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             };
             double result = Double.POSITIVE_INFINITY;
@@ -2328,6 +2530,32 @@ public class PlaceholderRegistry {
                 result = Math.min(result, arg.toDouble());
             }
             return args.isEmpty() ? 0 : result;
+        }
+
+        static Number evalSum(List<PlaceholderValue> args) {
+            if(args.isEmpty()) {
+                throw new PlaceholderEvaluationException(
+                        "expects at least 1 argument, got " + args.size()
+                );
+            };
+            double result = 0;
+            for (PlaceholderValue arg : args) {
+                result += arg.toDouble();
+            }
+            return args.isEmpty() ? 0 : result;
+        }
+
+        static Number evalAverage(List<PlaceholderValue> args) {
+            if(args.isEmpty()) {
+                throw new PlaceholderEvaluationException(
+                        "expects at least 1 argument, got " + args.size()
+                );
+            };
+            double result = 0;
+            for (PlaceholderValue arg : args) {
+                result += arg.toDouble();
+            }
+            return args.isEmpty() ? 0 : result / args.size();
         }
 
         static Number evalAbs(List<PlaceholderValue> args) {
@@ -2360,7 +2588,7 @@ public class PlaceholderRegistry {
         static Number evalRound(List<PlaceholderValue> args) {
             if(args.isEmpty()) {
                 throw new PlaceholderEvaluationException(
-                        "expects at least 1 argument, got " + 0
+                        "expects at least 1 argument, got " + args.size()
                 );
             }
 
@@ -2420,6 +2648,53 @@ public class PlaceholderRegistry {
 
             return Math.pow(a, b);
         }
+
+        static Number evalSqrt(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            };
+            return Math.sqrt(args.getFirst().toDouble());
+        }
+
+        static Number evalDistance(List<PlaceholderValue> args) {
+            if(args.size() != 6) {
+                throw new PlaceholderEvaluationException(
+                        "expects 6 arguments, got " + args.size()
+                );
+            };
+            double x1 = args.getFirst().toDouble();
+            double y1 = args.get(1).toDouble();
+            double z1 = args.get(2).toDouble();
+            double x2 = args.get(3).toDouble();
+            double y2 = args.get(4).toDouble();
+            double z2 = args.get(5).toDouble();
+
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double dz = z2 - z1;
+
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        static Number evalRandom(List<PlaceholderValue> args) {
+            if(!args.isEmpty()) {
+                throw new PlaceholderEvaluationException(
+                        "expects no arguments, got " + args.size()
+                );
+            };
+            return Math.random();
+        }
+
+        static Number evalRandomRange(List<PlaceholderValue> args) {
+            if(args.size() != 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects 2 arguments, got " + args.size()
+                );
+            };
+            return args.getFirst().toDouble() + Math.random() * (args.get(1).toDouble() - args.getFirst().toDouble());
+        }
         /// String Manipulation
 
         static PlaceholderValue evalSubstring(List<PlaceholderValue> args) {
@@ -2477,6 +2752,16 @@ public class PlaceholderRegistry {
                 int fromIndex = args.get(2).toInteger();
                 return value.lastIndexOf(valueToSearch, fromIndex);
             }
+        }
+
+        static String evalCharAt(List<PlaceholderValue> args) {
+            if(args.size() != 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects 2 arguments, got " + args.size()
+                );
+            };
+
+            return String.valueOf(args.getFirst().toString().charAt(args.get(1).toInteger()));
         }
 
         static PlaceholderValue evalRepeat(List<PlaceholderValue> args) {
@@ -2552,6 +2837,67 @@ public class PlaceholderRegistry {
             }
         }
 
+        static PlaceholderValue evalReplaceFirst(List<PlaceholderValue> args) {
+            if(args.size() != 3) {
+                throw new PlaceholderEvaluationException(
+                        "expects 3 argument, got " + args.size()
+                );
+            };
+
+            PlaceholderValue value = args.getFirst();
+
+            if(value.isComponent()) {
+                return PlaceholderValue.component(TextHelper.replaceFirst(value.toComponent(), args.get(1).toString(), args.get(2).toString()));
+            } else {
+                return PlaceholderValue.text(value.toString().replaceFirst(args.get(1).toString(), args.get(2).toString()));
+            }
+        }
+
+        static PlaceholderValue evalReverse(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            };
+
+            PlaceholderValue value = args.getFirst();
+
+            if(value.isComponent()) {
+                return PlaceholderValue.component(TextHelper.reverse(value.toComponent()));
+            } else {
+                return PlaceholderValue.text(new StringBuilder(value.toString()).reverse().toString());
+            }
+        }
+
+        static MutableComponent evalJoin(List<PlaceholderValue> args) {
+            if(args.size() < 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects at least 2 arguments, got " + args.size()
+                );
+            };
+
+            MutableComponent result = args.get(1).toComponent();
+            MutableComponent separator = args.getFirst().toComponent();
+
+            if(args.size() > 2) for (PlaceholderValue arg : args.subList(2, args.size())) {
+                result.append(separator).append(arg.toComponent());
+            }
+
+            return result;
+        }
+
+        static Number evalCount(List<PlaceholderValue> args) {
+            if(args.size() != 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects 2 arguments, got " + args.size()
+                );
+            };
+
+            String value = args.getFirst().toString();
+
+            return value.isEmpty() ? 0 : value.length() - value.replace(args.get(1).toString(), "").length() / args.get(1).toString().length();
+        }
+
         static Number evalLength(List<PlaceholderValue> args) {
             if(args.size() != 1) {
                 throw new PlaceholderEvaluationException(
@@ -2599,7 +2945,102 @@ public class PlaceholderRegistry {
             return TextHelper.literal(args.getFirst().toBoolean(), true);
         }
 
+        static PlaceholderValue evalTrim(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            };
+            return PlaceholderValue.component(TextHelper.trim(args.getFirst().toComponent()));
+        }
+
+        static PlaceholderValue evalPadStart(List<PlaceholderValue> args) {
+            if(args.size() != 3) {
+                throw new PlaceholderEvaluationException(
+                        "expects 3 arguments, got " + args.size()
+                );
+            };
+
+            PlaceholderValue value = args.getFirst();
+            int length = args.get(1).toInteger();
+            PlaceholderValue paddingValue = args.get(2);
+
+            MutableComponent paddedComponent = Component.empty();
+
+            for (int i = 0; i < length; i++) {
+                paddedComponent.append(paddingValue.toComponent());
+            }
+
+            MutableComponent result = paddedComponent.append(value.toComponent());
+
+            return PlaceholderValue.component(result);
+        }
+
+        static PlaceholderValue evalPadEnd(List<PlaceholderValue> args) {
+            if(args.size() != 3) {
+                throw new PlaceholderEvaluationException(
+                        "expects 3 arguments, got " + args.size()
+                );
+            };
+
+            PlaceholderValue value = args.getFirst();
+            int length = args.get(1).toInteger();
+            PlaceholderValue paddingValue = args.get(2);
+
+            MutableComponent paddedComponent = Component.empty();
+
+            for (int i = 0; i < length; i++) {
+                paddedComponent.append(paddingValue.toComponent());
+            }
+
+            MutableComponent result = value.toComponent().append(paddedComponent);
+
+            return PlaceholderValue.component(result);
+        }
+
+        static PlaceholderValue evalTruncate(List<PlaceholderValue> args) {
+            if(args.size() < 2) {
+                throw new PlaceholderEvaluationException(
+                        "expects at least 2 arguments, got " + args.size()
+                );
+            };
+
+            if(args.get(1).toInteger() < args.getFirst().toString().length()) {
+                MutableComponent truncatedText = TextHelper.substring(args.getFirst().toComponent(), 0, args.get(1).toInteger());
+                return args.size() > 2
+                        ? PlaceholderValue.component(truncatedText.append(args.get(2).toComponent()))
+                        : PlaceholderValue.component(truncatedText);
+            } else {
+                return args.getFirst();
+            }
+        }
+
+        static PlaceholderValue evalCapitalize(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            };
+            return PlaceholderValue.component(TextHelper.capitalize(args.getFirst().toComponent()));
+        }
+
         /// Misc
+
+        static String evalTypeOf(List<PlaceholderValue> args) {
+            if(args.size() != 1) {
+                throw new PlaceholderEvaluationException(
+                        "expects 1 argument, got " + args.size()
+                );
+            };
+
+            PlaceholderValue value = args.getFirst();
+
+            if(value.isComponent()) return "component";
+            else if (value.isString()) return "string";
+            else if (value.isBoolean()) return "boolean";
+            else if (value.isNumber()) return "number";
+            return "unknown";
+        }
 
         static PlaceholderValue evalHideLine(List<PlaceholderValue> args) {
             if(args.size() != 1) {
@@ -2738,11 +3179,11 @@ public class PlaceholderRegistry {
             if(param.variadic()) signature.append("...");
             signature.append(param.name());
             if(param.optional()) signature.append("?");
-            signature.append(": ").append(param.type());
+            signature.append(": ").append(param.getType());
 
             JsonObject paramObj = new JsonObject();
             paramObj.addProperty("name", param.name());
-            paramObj.addProperty("type", param.type());
+            paramObj.addProperty("type", param.getType());
             if(param.optional()) paramObj.addProperty("optional", true);
             if(param.variadic()) paramObj.addProperty("variadic", true);
             paramsArray.add(paramObj);

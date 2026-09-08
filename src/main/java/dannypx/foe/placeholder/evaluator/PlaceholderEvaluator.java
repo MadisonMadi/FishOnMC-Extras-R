@@ -33,6 +33,11 @@ public class PlaceholderEvaluator {
                 combined.append(colorCodesTracker.applyActiveStyle(resolved));
             }
         }
+
+        if(!errors.isEmpty()) {
+            combined = Component.literal(errors.getFirst()).withStyle(ChatFormatting.RED);
+        }
+
         return new PlaceholderResult(combined, success, errors);
     }
 
@@ -126,7 +131,7 @@ public class PlaceholderEvaluator {
         }
 
         if(!leftValue.isValidNumber() || !rightValue.isValidNumber()) {
-            PlaceholderValue badOperand = leftValue.isValidNumber() ? rightValue : rightValue;
+            PlaceholderValue badOperand = leftValue.isValidNumber() ? rightValue : leftValue;
             return this.trackedError(
                     "Non-numeric operand for '" + op + "': '" + badOperand.toString() + "'",
                     successAcc, errors

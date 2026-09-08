@@ -255,7 +255,7 @@ public class CustomHudElement extends Element implements ScreenConstants {
         customHud.getStringLines().forEach(componentParts -> {
             PlaceholderResult result = PlaceholderHandlerV2.instance().resolve(componentParts.value1());
 
-            if((result.success()[0] && !result.success()[1]) || !result.errors().isEmpty()) {
+            if((result.success()[0] || !result.errors().isEmpty()) && !result.success()[1]) {
                 componentLines.add(Triplet.of(componentParts.value2(), componentParts.value3(), result.text()));
                 hasData.set(true);
             }

@@ -39,8 +39,12 @@ public class PlaceholderHandlerV2 extends Handler {
     }
 
     public PlaceholderResult resolve(String placeholderString) {
+        return resolve(placeholderString, true);
+    }
+
+    public PlaceholderResult resolve(String placeholderString, boolean isThrottled) {
         PlaceholderCompiler.ThrottledPlaceholder t = throttled.computeIfAbsent(placeholderString, PlaceholderCompiler.ThrottledPlaceholder::new);
-        return t.get(evaluator);
+        return t.get(evaluator, isThrottled);
     }
 
     public void setUpdateIntervalMillis(int millis) {

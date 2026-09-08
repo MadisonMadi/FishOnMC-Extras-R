@@ -13,8 +13,38 @@ public class PlaceholderTreeNode {
 
     public enum ValueKind { NONE, STRING, COMPONENT, NUMBER, BOOLEAN, VALUE }
     public enum EvalKind { NONE, STRING, COMPONENT, NUMBER, BOOLEAN, VALUE }
+    public enum DocTypeKind { STRING, COMPONENT, NUMBER, BOOLEAN, VALUE }
 
-    public record Param(String name, String type, boolean optional, boolean variadic) {}
+    public record Param(String name, boolean optional, boolean variadic, DocTypeKind ...type) {
+        public String getType() {
+            StringBuilder str = new StringBuilder();
+            for (DocTypeKind typeKind : type) {
+                switch (typeKind) {
+                    case STRING -> {
+                        if (str.isEmpty()) str.append("string");
+                        else str.append("|string");
+                    }
+                    case COMPONENT -> {
+                        if (str.isEmpty()) str.append("component");
+                        else str.append("|component");
+                    }
+                    case NUMBER -> {
+                        if (str.isEmpty()) str.append("number");
+                        else str.append("|number");
+                    }
+                    case BOOLEAN -> {
+                        if (str.isEmpty()) str.append("boolean");
+                        else str.append("|boolean");
+                    }
+                    case VALUE -> {
+                        if (str.isEmpty()) str.append("dynamic");
+                        else str.append("|dynamic");
+                    }
+                }
+            }
+            return str.toString();
+        }
+    }
 
     private final String key;
     private final WildcardType wildcardType;
@@ -161,18 +191,18 @@ public class PlaceholderTreeNode {
 
     /// Documentation
 
-    public PlaceholderTreeNode param(String name, String type) {
-        params.add(new Param(name, type, false, false));
+    public PlaceholderTreeNode param(String name, DocTypeKind ...type) {
+        params.add(new Param(name, false, false, type));
         return this;
     }
 
-    public PlaceholderTreeNode paramOptional(String name, String type) {
-        params.add(new Param(name, type, true, false));
+    public PlaceholderTreeNode paramOptional(String name, DocTypeKind ...type) {
+        params.add(new Param(name, true, false, type));
         return this;
     }
 
-    public PlaceholderTreeNode paramVariadic(String name, String type) {
-        params.add(new Param(name, type, false, true));
+    public PlaceholderTreeNode paramVariadic(String name, DocTypeKind ...type) {
+        params.add(new Param(name, false, true, type));
         return this;
     }
 

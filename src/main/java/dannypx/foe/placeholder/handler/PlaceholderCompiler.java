@@ -102,12 +102,20 @@ public class PlaceholderCompiler {
         }
 
         public PlaceholderResult get(PlaceholderEvaluator evaluator) {
-            long gen = PlaceholderCompiler.currentGeneration();
-            if(gen != lastSeenGeneration) {
-                lastResult = evaluator.eval(ast);
-                lastSeenGeneration = gen;
+            return get(evaluator, true);
+        }
+
+        public PlaceholderResult get(PlaceholderEvaluator evaluator, boolean isThrottled) {
+            if(isThrottled) {
+                long gen = PlaceholderCompiler.currentGeneration();
+                if(gen != lastSeenGeneration) {
+                    lastResult = evaluator.eval(ast);
+                    lastSeenGeneration = gen;
+                }
+                return lastResult;
+            } else {
+                return evaluator.eval(ast);
             }
-            return lastResult;
         }
 
         public void forceRefresh() {
